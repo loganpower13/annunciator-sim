@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>King Air B200 Caution/Warning Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* Annunciator Panel Background */
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g><g fill="%23f59e0b" font-family="monospace" font-size="14"><text x="120" y="125">L. DC GEN</text><text x="120" y="175">HYD FLUID LOW</text><text x="120" y="225">RVS NOT READY</text><text x="120" y="275">R. DC GEN</text><text x="120" y="325">L. CHIP DETECT</text><text x="120" y="375">DUCT OVERTEMP</text><text x="120" y="425">R. CHIP DETECT</text><text x="120" y="475">L. ENG ICE FAIL</text><text x="450" y="125">L ENG FIRE</text><text x="450" y="175">DOOR UNLOCKED</text><text x="450" y="225">ALT WARN</text><text x="450" y="275">R ENG FIRE</text><text x="450" y="325">L FUEL PRESS</text><text x="450" y="375">L OIL PRESS</text><text x="450" y="425">R FUEL PRESS</text><text x="450" y="475">R OIL PRESS</text></g><g fill="%23ef4444"><circle cx="90" cy="120" r="6"/><circle cx="90" cy="220" r="6"/><circle cx="90" cy="320" r="6"/><circle cx="90" cy="420" r="6"/><circle cx="420" cy="120" r="6"/><circle cx="420" cy="220" r="6"/><circle cx="420" cy="320" r="6"/><circle cx="420" cy="420" r="6"/></g><g fill="%2310b981"><circle cx="90" cy="170" r="6"/><circle cx="90" cy="270" r="6"/><circle cx="90" cy="370" r="6"/><circle cx="90" cy="470" r="6"/><circle cx="420" cy="170" r="6"/><circle cx="420" cy="270" r="6"/><circle cx="420" cy="370" r="6"/><circle cx="420" cy="470" r="6"/></g></svg>') center/cover no-repeat;
+      opacity: 0.35;
+      filter: blur(12px) brightness(0.8);
+    }
+
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .annunciator-grid {
+      display: grid;
+      gap: 4px;
+      background-color: rgba(51, 51, 51, 0.9);
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #555;
+    }
+    .warning-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .caution-advisory-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .annunciator-light {
+      background-color: #222;
+      color: white;
+      text-align: center;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 4px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .annunciator-light.active-warning {
+      background-color: #dc2626;
+      color: white;
+    }
+    .annunciator-light.active-caution {
+      background-color: #eab308;
+      color: black;
+    }
+    .annunciator-light.active-advisory {
+      background-color: #22c55e;
+      color: white;
+    }
+    .sidebar {
+      width: 200px;
+      padding: 10px;
+      background-color: rgba(243, 244, 246, 0.9);
+      border-right: 1px solid #e5e7eb;
+      color: #333;
+    }
+    .main-content {
+      flex-grow: 1;
+      padding: 10px;
+    }
+    .procedure-text {
+      white-space: pre-line;
+      text-align: left;
+    }
+    #message {
+      text-align: left;
+    }
+    
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    
+    /* Home button styling */
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Improved message section styling */
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Annunciator Panel Background -->
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar">
+      <h2 class="text-lg font-bold mb-2">Mode Select</h2>
+      <select id="modeSelect" class="w-full p-2 border rounded" onchange="updateMode()">
+        <option value="all">All</option>
+        <option value="warnings">Warnings Only</option>
+        <option value="cautions">Cautions Only</option>
+        <option value="advisories">Advisories Only</option>
+      </select>
+      
+      <!-- Home Button -->
+      <a href="index.html" class="home-btn w-full justify-center mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+        Back to Home
+      </a>
+    </div>
+    <div class="main-content">
+      <div class="sim-card w-full">
+        <h1 class="text-2xl font-bold mb-4 text-center">King Air B200 Caution/Warning Simulator</h1>
+        <p class="text-center mb-4">Practice handling master cautions and warnings. Click the Master button to acknowledge, then "Next" for a new scenario. Refer to company SOPs and QRHs for official guidance.</p>
+
+        <div class="flex justify-center gap-4 mb-4">
+          <div id="masterWarning" class="p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40" style="display: none;" onclick="acknowledgeAlert('Warning')">
+            MASTER WARNING
+          </div>
+          <div id="masterCaution" class="p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40" style="display: none;" onclick="acknowledgeAlert('Caution')">
+            MASTER CAUTION
+          </div>
+          <div id="masterAdvisory" class="p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40" style="display: none;" onclick="acknowledgeAlert('Advisory')">
+            MASTER ADVISORY
+          </div>
+        </div>
+
+        <h2 class="text-xl font-semibold mb-2">Warning Annunciator Panel</h2>
+        <div id="warningPanel" class="annunciator-grid warning-grid mb-4"></div>
+
+        <h2 class="text-xl font-semibold mb-2">Caution-Advisory Annunciator Panel</h2>
+        <div id="cautionAdvisoryPanel" class="annunciator-grid caution-advisory-grid"></div>
+
+        <!-- Improved Message Section -->
+        <div class="message-container">
+          <div class="message-header">Scenario Information</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Description</div>
+              <div id="description" class="message-value">Click "Next" to start.</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Procedure</div>
+              <div id="procedure" class="message-value procedure-text">Awaiting selection...</div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="generateScenario()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mt-4">Next Scenario</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = 'all';
+
+    const scenarios = [
+      {
+        type: "Warning",
+        name: "L ENG FIRE",
+        description: "Fire detected in the left engine.",
+        procedure: "Affected Engine:\n1. Condition Lever ...... FUEL CUTOFF\n2. Prop Lever ...... FEATHER\n3. Firewall Shutoff Valve ...... CLOSE\n4. Fire Extinguisher (if installed) (if fire warning persists) ...... ACTUATE\n5. Generator ...... OFF\n6. Auto Ignition ...... OFF\n7. Autofeather ...... OFF\n8. Prop Sync ...... OFF\n9. Brake Deice (if installed) ...... OFF\n10. Electrical Load ...... MONITOR"
+      },
+      {
+        type: "Warning",
+        name: "R ENG FIRE",
+        description: "Fire detected in the right engine.",
+        procedure: "Affected Engine:\n1. Condition Lever ...... FUEL CUTOFF\n2. Prop Lever ...... FEATHER\n3. Firewall Shutoff Valve ...... CLOSE\n4. Fire Extinguisher (if installed) (if fire warning persists) ...... ACTUATE\n5. Generator ...... OFF\n6. Auto Ignition ...... OFF\n7. Autofeather ...... OFF\n8. Prop Sync ...... OFF\n9. Brake Deice (if installed) ...... OFF\n10. Electrical Load ...... MONITOR"
+      },
+      {
+        type: "Warning",
+        name: "ALT WARN",
+        description: "Cabin altitude exceeds safe limits.",
+        procedure: "1. Oxygen Mask(s) ...... DON\n2. Mic Switch(es) ...... OXY\n3. Passenger Manual Drop-Out ...... PULL ON\n[PASS OXY ON] - ILLUMINATED\n4. Descend ...... AS REQUIRED\n5. Passengers ...... PULL LANYARD PIN, DON MASK\nAdequate oxygen pressure is not provided to the passengers for sustained flight at cabin altitudes above 34,000 feet. The highest recommended cabin altitude for sustained flight is 25,000 feet.\n6. Range ...... DETERMINE FOR FINAL CRUISE ALTITUDE\n7. Oxygen Duration ...... CONFIRM (refer to Oxygen Duration in Normal Procedures)"
+      },
+      {
+        type: "Warning",
+        name: "L FUEL PRESS",
+        description: "Low fuel pressure on the left engine.",
+        procedure: "1. Standby Pump (failed side) ...... ON\n2. [FUEL PRESS] ...... EXTINGUISHED\n3. Oil Temperature and Pressure Indicators (failed side) ...... MONITOR"
+      },
+      {
+        type: "Warning",
+        name: "R FUEL PRESS",
+        description: "Low fuel pressure on the right engine.",
+        procedure: "1. Standby Pump (failed side) ...... ON\n2. [FUEL PRESS] ...... EXTINGUISHED\n3. Oil Temperature and Pressure Indicators (failed side) ...... MONITOR"
+      },
+      {
+        type: "Warning",
+        name: "L OIL PRESS",
+        description: "Low oil pressure on the left engine.",
+        procedure: "1. Oil Pressure ...... CONFIRM BELOW 60 PSI\nIf Confirmed:\n2. Engine ...... SECURE (See Emergency Engine Shutdown)\nOr:\n3. Land at the nearest suitable airport using the minimum power required to sustain flight."
+      },
+      {
+        type: "Warning",
+        name: "R OIL PRESS",
+        description: "Low oil pressure on the right engine.",
+        procedure: "1. Oil Pressure ...... CONFIRM BELOW 60 PSI\nIf Confirmed:\n2. Engine ...... SECURE (See Emergency Engine Shutdown)\nOr:\n3. Land at the nearest suitable airport using the minimum power required to sustain flight."
+      },
+      {
+        type: "Warning",
+        name: "L GEN OVHT",
+        description: "Left generator overheating.",
+        procedure: "1. Check generator load. 2. Reduce electrical demand. 3. Monitor temperature."
+      },
+      {
+        type: "Warning",
+        name: "R GEN OVHT",
+        description: "Right generator overheating.",
+        procedure: "1. Check generator load. 2. Reduce electrical demand. 3. Monitor temperature."
+      },
+      {
+        type: "Warning",
+        name: "A/P TRIM FAIL",
+        description: "Autopilot trim system failure.",
+        procedure: "1. Flight Controls ...... HOLD FIRMLY\n2. A/P ...... DISENGAGE\n3. Retrim airplane if necessary.\n4. A/P ...... REENGAGE (if desired)\n(A/P will reengage & TRIM annunciator will extinguish if fault is cleared)"
+      },
+      {
+        type: "Warning",
+        name: "L BL AIR FAIL",
+        description: "Left bleed air system failure.",
+        procedure: "Illumination of an annunciator in flight indicates a possible rupture of a bleed air line aft of the firewall shutoff valve, or a leak in the cabin pressurization ducting.\n1. Bleed Air Valve (affected engine) ...... INST & ENVIR OFF\n[L BL AIR OFF] or [R BL AIR OFF] - ILLUMINATED\n2. Engine Instruments ...... MONITOR"
+      },
+      {
+        type: "Warning",
+        name: "R BL AIR FAIL",
+        description: "Right bleed air system failure.",
+        procedure: "Illumination of an annunciator in flight indicates a possible rupture of a bleed air line aft of the firewall shutoff valve, or a leak in the cabin pressurization ducting.\n1. Bleed Air Valve (affected engine) ...... INST & ENVIR OFF\n[L BL AIR OFF] or [R BL AIR OFF] - ILLUMINATED\n2. Engine Instruments ...... MONITOR"
+      },
+      {
+        type: "Warning",
+        name: "A/P FAIL",
+        description: "Autopilot system failure.",
+        procedure: "If An Automatic Disengagement Occurs:\n1. Maintain airplane control.\n2. AP/YD disconnect ...... DEPRESS TO 1ST LEVEL TO CANCEL HORN\n3. Determine cause of disengagment.\n4. A/P and YD ...... AS REQUIRED"
+      },
+      {
+        type: "Warning",
+        name: "INVERTER",
+        description: "Inverter failure.",
+        procedure: "1. Check electrical system. 2. Switch to alternate inverter if available. 3. Monitor avionics."
+      },
+      {
+        type: "Warning",
+        name: "DOOR UNLOCKED",
+        description: "Airstair door or cargo door unlocked.",
+        procedure: "Do not attempt to check the security of the airstair door or cargo door in flight. Remain as far from the door as possible with seatbelts securely fastened.\nIf The [DOOR UNLOCKED] Illuminates, Or If An Unlatched Airstair Door/Cargo Door Is Suspected:\n1. All Occupants ...... SEATED WITH SEAT BELTS SECURELY FASTENED\n2. Cabin Sign ...... NO SMOKE AND FSB\n3. Cabin Differential Pressure ...... REDUCE TO LOWEST VALUE PRACTICAL (zero preferred)\na. Descend and/or\nb. Select higher cabin altitude setting.\n4. Oxygen ...... AS REQUIRED\n5. Land ...... NEAREST SUITABLE AIRPORT"
+      },
+      {
+        type: "Caution",
+        name: "L DC GEN",
+        description: "Left DC generator failure.",
+        procedure: "Generators ...... RESET, THEN ON\nIf Left Generator Will Not Reset:\nOperating Generator Loadmeter ...... DO NOT EXCEED 100% (88% above 31,000 feet)\nInoperative Generator ...... OFF"
+      },
+      {
+        type: "Caution",
+        name: "R DC GEN",
+        description: "Right DC generator failure.",
+        procedure: "Generators ...... RESET, THEN ON\nIf Right Generator Will Not Reset:\nOperating Generator Loadmeter ...... DO NOT EXCEED 100% (88% above 31,000 feet)\nInoperative Generator ...... OFF"
+      },
+      {
+        type: "Caution",
+        name: "HYD FLUID LOW",
+        description: "Low hydraulic fluid level.",
+        procedure: "1. Check hydraulic reservoir. 2. Avoid heavy maneuvering. 3. Prepare for landing."
+      },
+      {
+        type: "Caution",
+        name: "RVS NOT READY",
+        description: "RVSM system not operational.",
+        procedure: "1. Verify RVSM equipment. 2. Notify ATC. 3. Adjust flight level if needed."
+      },
+      {
+        type: "Caution",
+        name: "L CHIP DETECT",
+        description: "Left engine chip detected.",
+        procedure: "1. Check oil filter. 2. Reduce power. 3. Prepare for inspection."
+      },
+      {
+        type: "Caution",
+        name: "PROP SYNC ON",
+        description: "Propeller sync system engaged.",
+        procedure: "1. Verify propeller sync status. 2. Adjust if necessary. 3. Monitor performance."
+      },
+      {
+        type: "Caution",
+        name: "DUCT OVERTEMP",
+        description: "Duct over-temperature detected.",
+        procedure: "1. Check bleed air system. 2. Reduce heat load. 3. Monitor temperature."
+      },
+      {
+        type: "Caution",
+        name: "R CHIP DETECT",
+        description: "Right engine chip detected.",
+        procedure: "1. Check oil filter. 2. Reduce power. 3. Prepare for inspection."
+      },
+      {
+        type: "Caution",
+        name: "L ENG ICE FAIL",
+        description: "Left engine ice protection failure.",
+        procedure: "1. Check ice protection system. 2. Activate manual de-ice. 3. Monitor conditions."
+      },
+      {
+        type: "Caution",
+        name: "BATTERY CHARGE",
+        description: "Battery is not charging properly.",
+        procedure: "1. Check battery switch. 2. Reduce electrical load. 3. Monitor voltage."
+      },
+      {
+        type: "Caution",
+        name: "EXT PWR",
+        description: "External power issue.",
+        procedure: "1. Check external power connection. 2. Switch to internal power. 3. Monitor systems."
+      },
+      {
+        type: "Caution",
+        name: "R ENG ICE FAIL",
+        description: "Right engine ice protection failure.",
+        procedure: "1. Check ice protection system. 2. Activate manual de-ice. 3. Monitor conditions."
+      },
+      {
+        type: "Caution",
+        name: "NO TRANSFER",
+        description: "Auxiliary fuel transfer failure.",
+        procedure: "1. Check auxiliary fuel quantity. 2. Monitor main fuel tanks. 3. Refer to POH for manual transfer procedures."
+      },
+      {
+        type: "Caution",
+        name: "AIR CND N1 LOW",
+        description: "Air conditioning N1 low.",
+        procedure: "1. Increase engine power if possible. 2. Monitor cabin temperature. 3. Refer to POH."
+      },
+      {
+        type: "Caution",
+        name: "PASS OXY ON",
+        description: "Passenger oxygen on.",
+        procedure: "1. Check cabin altitude. 2. Ensure passengers are using masks if required. 3. Descend if necessary."
+      },
+      {
+        type: "Caution",
+        name: "FUEL CROSSFEED",
+        description: "Fuel crossfeed active.",
+        procedure: "1. Verify fuel balance. 2. Monitor fuel levels. 3. Turn off crossfeed when balanced."
+      },
+      {
+        type: "Caution",
+        name: "L PITOT HEAT",
+        description: "Left pitot heat on.",
+        procedure: "Monitor for icing. Refer to POH."
+      },
+      {
+        type: "Caution",
+        name: "R PITOT HEAT",
+        description: "Right pitot heat on.",
+        procedure: "Monitor for icing. Refer to POH."
+      },
+      {
+        type: "Advisory",
+        name: "L AUTOFEATHER",
+        description: "Left auto feather system active.",
+        procedure: "Monitor system. Refer to POH for details."
+      },
+      {
+        type: "Advisory",
+        name: "R AUTOFEATHER",
+        description: "Right auto feather system active.",
+        procedure: "Monitor system. Refer to POH for details."
+      },
+      {
+        type: "Advisory",
+        name: "L ENG ANTI-ICE",
+        description: "Left engine anti-ice on.",
+        procedure: "Monitor for icing conditions. Refer to POH."
+      },
+      {
+        type: "Advisory",
+        name: "R ENG ANTI-ICE",
+        description: "Right engine anti-ice on.",
+        procedure: "Monitor for icing conditions. Refer to POH."
+      },
+      {
+        type: "Advisory",
+        name: "L IGNITION ON",
+        description: "Left ignition on.",
+        procedure: "Verify ignition status. Turn off when not needed."
+      },
+      {
+        type: "Advisory",
+        name: "R IGNITION ON",
+        description: "Right ignition on.",
+        procedure: "Verify ignition status. Turn off when not needed."
+      },
+      {
+        type: "Advisory",
+        name: "LDG/TAXI LIGHT",
+        description: "Landing/taxi light on.",
+        procedure: "Monitor light status. Turn off when not needed."
+      },
+      {
+        type: "Advisory",
+        name: "ELEC HEAT ON",
+        description: "Electric heat on.",
+        procedure: "Monitor cabin temperature. Refer to POH."
+      },
+      {
+        type: "Advisory",
+        name: "BRAKE DEICE ON",
+        description: "Brake deice on.",
+        procedure: "Monitor for icing on landing gear. Refer to POH."
+      },
+      {
+        type: "Advisory",
+        name: "L BL AIR OFF",
+        description: "Left bleed air off.",
+        procedure: "Monitor pressurization. Refer to POH."
+      },
+      {
+        type: "Advisory",
+        name: "R BL AIR OFF",
+        description: "Right bleed air off.",
+        procedure: "Monitor pressurization. Refer to POH."
+      }
+    ];
+
+    const annunciatorLayout = {
+      warnings: [
+        "L ENG FIRE", "INVERTER", "DOOR UNLOCKED", "ALT WARN", "R ENG FIRE",
+        "L FUEL PRESS", "", "", "", "R FUEL PRESS",
+        "L OIL PRESS", "L GEN OVHT", "A/P TRIM FAIL", "R GEN OVHT", "R OIL PRESS",
+        "", "L BL AIR FAIL", "A/P FAIL", "R BL AIR FAIL", ""
+      ],
+      cautionAdvisory: [
+        "L DC GEN", "———", "HYD FLUID LOW", "RVS NOT READY", "———", "R DC GEN",
+        "L CHIP DETECT", "———", "PROP SYNC ON", "DUCT OVERTEMP", "———", "R CHIP DETECT",
+        "L ENG ICE FAIL", "L PITOT HEAT", "———", "EXT PWR", "R PITOT HEAT", "R ENG ICE FAIL",
+        "L AUTOFEATHER", "———", "AIR CND N1 LOW", "NO TRANSFER", "———", "R AUTOFEATHER",
+        "L ENG ANTI-ICE", "*BRAKE DEICE ON", "LDG/TAXI LIGHT", "PASS OXY ON", "ELEC HEAT ON", "R ENG ANTI-ICE",
+        "L IGNITION ON", "L BL AIR OFF", "———", "FUEL CROSSFEED", "R BL AIR OFF", "R IGNITION ON"
+      ]
+    };
+
+    function initializeAnnunciatorPanel() {
+      const warningPanel = document.getElementById('warningPanel');
+      const cautionAdvisoryPanel = document.getElementById('cautionAdvisoryPanel');
+      warningPanel.innerHTML = '';
+      cautionAdvisoryPanel.innerHTML = '';
+
+      annunciatorLayout.warnings.forEach(light => {
+        const div = document.createElement('div');
+        div.className = 'annunciator-light';
+        div.id = `light-${light.replace(/\s+/g, '-')}`;
+        div.textContent = light || '———';
+        warningPanel.appendChild(div);
+      });
+
+      annunciatorLayout.cautionAdvisory.forEach(light => {
+        const div = document.createElement('div');
+        div.className = 'annunciator-light';
+        div.id = `light-${light.replace(/\s+/g, '-')}`;
+        div.textContent = light || '———';
+        cautionAdvisoryPanel.appendChild(div);
+      });
+    }
+
+    function updateMode() {
+      currentMode = document.getElementById('modeSelect').value;
+      generateScenario();
+    }
+
+    function generateScenario() {
+      let filteredScenarios = scenarios;
+      if (currentMode === 'warnings') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Warning');
+      } else if (currentMode === 'cautions') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Caution');
+      } else if (currentMode === 'advisories') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Advisory');
+      }
+      if (filteredScenarios.length === 0) {
+        document.getElementById('description').textContent = 'No scenarios available in this mode.';
+        document.getElementById('procedure').textContent = '';
+        return;
+      }
+      const scenario = filteredScenarios[Math.floor(Math.random() * filteredScenarios.length)];
+      const masterCaution = document.getElementById('masterCaution');
+      const masterWarning = document.getElementById('masterWarning');
+      const masterAdvisory = document.getElementById('masterAdvisory');
+      const description = document.getElementById('description');
+      const procedure = document.getElementById('procedure');
+
+      // Reset all annunciator lights
+      [...annunciatorLayout.warnings, ...annunciatorLayout.cautionAdvisory].forEach(light => {
+        const lightElement = document.getElementById(`light-${light.replace(/\s+/g, '-')}`);
+        if (lightElement) lightElement.className = 'annunciator-light';
+      });
+
+      // Activate the specific annunciator light with pulsing animation
+      const lightElement = document.getElementById(`light-${scenario.name.replace(/\s+/g, '-')}`);
+      if (lightElement) {
+        lightElement.className = `annunciator-light animate-pulse ${
+          scenario.type === 'Caution' ? 'active-caution' : (scenario.type === 'Advisory' ? 'active-advisory' : 'active-warning')
+        }`;
+      }
+
+      // Update master buttons
+      masterCaution.style.display = scenario.type === 'Caution' ? 'block' : 'none';
+      masterWarning.style.display = scenario.type === 'Warning' ? 'block' : 'none';
+      masterAdvisory.style.display = scenario.type === 'Advisory' ? 'block' : 'none';
+      masterCaution.className = `p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40 ${
+        scenario.type === 'Caution' ? 'bg-yellow-500 animate-pulse' : ''
+      }`;
+      masterWarning.className = `p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40 ${
+        scenario.type === 'Warning' ? 'bg-red-500 animate-pulse' : ''
+      }`;
+      masterAdvisory.className = `p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40 ${
+        scenario.type === 'Advisory' ? 'bg-green-500 animate-pulse' : ''
+      }`;
+
+      // Update description and procedure
+      description.textContent = scenario.description;
+      procedure.textContent = scenario.procedure;
+    }
+
+    function acknowledgeAlert(type) {
+      const masterCaution = document.getElementById('masterCaution');
+      const masterWarning = document.getElementById('masterWarning');
+      const masterAdvisory = document.getElementById('masterAdvisory');
+      const activeLight = document.querySelector('.annunciator-light.animate-pulse');
+
+      if (type === 'Caution') {
+        masterCaution.classList.remove('animate-pulse');
+        masterCaution.classList.add('opacity-75');
+      } else if (type === 'Warning') {
+        masterWarning.classList.remove('animate-pulse');
+        masterWarning.classList.add('opacity-75');
+      } else if (type === 'Advisory') {
+        masterAdvisory.classList.remove('animate-pulse');
+        masterAdvisory.classList.add('opacity-75');
+      }
+
+      if (activeLight) {
+        activeLight.classList.remove('animate-pulse');
+        activeLight.classList.add('opacity-75');
+      }
+    }
+
+    // Initialize the annunciator panel on page load
+    initializeAnnunciatorPanel();
+  </script>
+</body>
+</html>

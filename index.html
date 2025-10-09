@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Annunciator Sim</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* ---------- HERO HEADER ---------- */
+    .header {
+      position: relative;
+      text-align: center;
+      padding: 8rem 1rem;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    .header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      /* Subtle background with single master caution and warning buttons */
+      background: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23111b2e;stop-opacity:1" /><stop offset="100%" style="stop-color:%230d1424;stop-opacity:1" /></linearGradient></defs><rect width="800" height="600" fill="url(%23bg)"/><g opacity="0.4"><g fill="%231a2337" stroke="%2329395c" stroke-width="1"><rect x="150" y="200" width="120" height="80" rx="8"/><rect x="530" y="200" width="120" height="80" rx="8"/></g><g fill="%23eab308" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle" font-size="14"><text x="210" y="225">MASTER</text><text x="210" y="245">CAUTION</text><text x="210" y="265" font-size="10">PRESS TO RESET</text></g><g fill="%23dc2626" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle" font-size="14"><text x="590" y="225">MASTER</text><text x="590" y="245">WARNING</text><text x="590" y="265" font-size="10">PRESS TO RESET</text></g><g fill="%23333"><rect x="190" y="270" width="40" height="6" rx="2"/><rect x="570" y="270" width="40" height="6" rx="2"/></g></g></svg>') center/cover no-repeat;
+      opacity: 0.25;
+      filter: blur(14px) brightness(0.7);
+      z-index: 0;
+    }
+    .frosted {
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      backdrop-filter: blur(10px) saturate(150%);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 1rem;
+      padding: 3rem 2rem;
+      box-shadow: 0 0 40px rgba(0,0,0,0.6);
+      animation: fadeIn 1.5s ease;
+    }
+    .header h1 {
+      font-size: 3.25rem;
+      font-weight: 700;
+      text-shadow: 0 0 15px rgba(255,255,255,0.4);
+    }
+    .header p {
+      margin-top: 1rem;
+      color: #cbd5e1;
+      font-size: 1.25rem;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- FEATURES ---------- */
+    .feature {
+      background: rgba(255,255,255,0.05);
+      border-radius: 1rem;
+      padding: 2rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+    }
+
+    /* ---------- SIM SECTION ---------- */
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-top: 3rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    .launch-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+    }
+    .launch-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 25px rgba(59,130,246,0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="frosted">
+      <h1>The Annunciator Sim</h1>
+      <p>Interactive training simulators for aviation professionals</p>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto p-6">
+    <div class="grid md:grid-cols-3 gap-6 text-center">
+      <div class="feature">
+        <div class="text-4xl mb-2">⚡</div>
+        <h3 class="font-semibold text-lg text-white">Realistic Scenarios</h3>
+        <p class="text-gray-300">Authentic caution, warning, and advisory training environments.</p>
+      </div>
+      <div class="feature">
+        <div class="text-4xl mb-2">📚</div>
+        <h3 class="font-semibold text-lg text-white">Procedure Training</h3>
+        <p class="text-gray-300">Step-by-step emergency procedures and system logic review.</p>
+      </div>
+      <div class="feature">
+        <div class="text-4xl mb-2">🎯</div>
+        <h3 class="font-semibold text-lg text-white">Skill Assessment</h3>
+        <p class="text-gray-300">Evaluate your reaction times and system understanding.</p>
+      </div>
+    </div>
+
+    <h2 class="text-3xl font-semibold mt-16 mb-6 text-center text-white">Available Simulators</h2>
+    <div class="sim-card text-center">
+      <h3 class="text-2xl font-bold mb-2">King Air B200</h3>
+      <p class="mb-4 text-gray-300">
+        Comprehensive caution and warning system simulator for the Beechcraft King Air B200.
+        Practice emergency procedures for engine fires, system failures, and advisory scenarios.
+      </p>
+      <ul class="list-disc text-left mx-auto max-w-md text-gray-300">
+        <li>15 + Warning scenarios</li>
+        <li>20 + Caution scenarios</li>
+        <li>10 + Advisory scenarios</li>
+        <li>Official procedure checklists</li>
+      </ul>
+      <a href="kingair_b200_simulator.html" class="launch-btn">Launch King Air B200 Simulator</a>
+    </div>
+    <p class="mt-4 text-center text-gray-500">
+      More aircraft simulators coming soon — Cessna 208 Caravan, Pilatus PC-12.
+    </p>
+  </div>
+</body>
+</html>
