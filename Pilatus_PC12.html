@@ -26,7 +26,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g></svg>') center/cover no-repeat;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a233[...]
       opacity: 0.35;
       filter: blur(12px) brightness(0.8);
     }
@@ -196,7 +196,7 @@
       
       <a href="index.html" class="home-btn w-full justify-center mt-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-[...]
         </svg>
         Back to Home
       </a>
@@ -249,13 +249,13 @@
     const cautionLights = [
       "AD DISENG", "GEN 1 OFF", "GEN 2 OFF", "BUS TIE", "PUSHER", "FIRE DETECT", 
       "PUSHER ICE MODE", "BAT OFF", "INVERTER", "BAT HOT", "FLAPS", "CHIP", 
-      "N ESNTL BUS", "L FUEL LOW", "FUEL PRESS", "HYDR", "ECS", "AOA DE IGE", 
-      "R FUEL LOW", "DE IGE"
+      "N ESNTL BUS", "L FUEL LOW", "FUEL PRESS", "HYDR", "ECS", "AOA DE ICE", 
+      "R FUEL LOW", "DE ICE"
     ];
     
     const advisoryLights = [
-      "L FUEL PUMP", "PASS OXY", "INERT SEP", "PROBES DE IGE", "R FUEL PUMP",
-      "DE IGE BOOTS", "WSHLD HEAT", "PROP DE IGE"
+      "L FUEL PUMP", "PASS OXY", "INERT SEP", "PROBES DE ICE", "R FUEL PUMP",
+      "DE ICE BOOTS", "WSHLD HEAT", "PROP DE ICE"
     ];
 
     // Blue lights - these will highlight blue when active
@@ -338,7 +338,7 @@
       },
       {
         type: "Caution",
-        name: "DE IGE",
+        name: "DE ICE",
         description: "De-ice system active.",
         procedure: "PROCEDURES TO BE ADDED"
       },
@@ -381,13 +381,13 @@
       },
       {
         type: "Advisory",
-        name: "PROBES DE IGE",
+        name: "PROBES DE ICE",
         description: "Probe de-ice active.",
         procedure: "PROCEDURES TO BE ADDED"
       },
       {
         type: "Advisory",
-        name: "DE IGE BOOTS",
+        name: "DE ICE BOOTS",
         description: "De-ice boots active.",
         procedure: "PROCEDURES TO BE ADDED"
       },
@@ -399,7 +399,7 @@
       },
       {
         type: "Advisory",
-        name: "PROP DE IGE",
+        name: "PROP DE ICE",
         description: "Propeller de-ice active.",
         procedure: "PROCEDURES TO BE ADDED"
       },
@@ -429,9 +429,9 @@
       "ESNTL BUS", "AV BUS", "STAB TRIM", "OIL QTY", "ENG FIRE", "AD DISENG",
       "GEN 1 OFF", "GEN 2 OFF", "BUS TIE", "PUSHER", "FIRE DETECT", "PUSHER ICE MODE",
       "BAT OFF", "INVERTER", "BAT HOT", "FLAPS", "CHIP", "N ESNTL BUS",
-      "L FUEL LOW", "FUEL PRESS", "HYDR", "ECS", "AOA DE IGE", "R FUEL LOW",
-      "L FUEL PUMP", "PASS OXY", "DE IGE", "INERT SEP", "PROBES DE ICE", "R FUEL PUMP",
-      "IGNITION", "DE IGE BOOTS", "WSHLD HEAT", "PROP DE IGE", "COOL", "A/P TRIM BLUE" // Bottom left A/P TRIM (blue)
+      "L FUEL LOW", "FUEL PRESS", "HYDR", "ECS", "AOA DE ICE", "R FUEL LOW",
+      "L FUEL PUMP", "PASS OXY", "DE ICE", "INERT SEP", "PROBES DE ICE", "R FUEL PUMP",
+      "IGNITION", "DE ICE BOOTS", "WSHLD HEAT", "PROP DE ICE", "COOL", "A/P TRIM BLUE" // Bottom left A/P TRIM (blue)
     ];
 
     function initializeAnnunciatorPanel() {
