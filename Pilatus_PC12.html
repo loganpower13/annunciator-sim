@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pilatus PC-12 Caution/Warning Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g></svg>') center/cover no-repeat;
+      opacity: 0.35;
+      filter: blur(12px) brightness(0.8);
+    }
+
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .annunciator-grid {
+      display: grid;
+      gap: 4px;
+      background-color: rgba(51, 51, 51, 0.9);
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #555;
+    }
+    .single-panel-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .annunciator-light {
+      background-color: #222;
+      color: white;
+      text-align: center;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 4px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .annunciator-light.active-warning {
+      background-color: #dc2626;
+      color: white;
+    }
+    .annunciator-light.active-caution {
+      background-color: #eab308;
+      color: black;
+    }
+    .annunciator-light.active-advisory {
+      background-color: #22c55e;
+      color: white;
+    }
+    .annunciator-light.active-blue {
+      background-color: #1e40af;
+      color: white;
+    }
+    .sidebar {
+      width: 200px;
+      padding: 10px;
+      background-color: rgba(243, 244, 246, 0.9);
+      border-right: 1px solid #e5e7eb;
+      color: #333;
+    }
+    .main-content {
+      flex-grow: 1;
+      padding: 10px;
+    }
+    
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    .procedure-text {
+      white-space: pre-line;
+      text-align: left;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
+    }
+    
+    .next-scenario-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      cursor: pointer;
+      width: 100%;
+      margin: 1.5rem 0;
+    }
+    
+    .next-scenario-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 25px rgba(59,130,246,0.9);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar">
+      <h2 class="text-lg font-bold mb-2">Mode Select</h2>
+      <select id="modeSelect" class="w-full p-2 border rounded" onchange="updateMode()">
+        <option value="all">All</option>
+        <option value="warnings">Warnings Only</option>
+        <option value="cautions">Cautions Only</option>
+        <option value="advisories">Advisories Only</option>
+      </select>
+      
+      <a href="index.html" class="home-btn w-full justify-center mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+        Back to Home
+      </a>
+    </div>
+    <div class="main-content">
+      <div class="sim-card w-full">
+        <h1 class="text-2xl font-bold mb-4 text-center">Pilatus PC-12 Caution/Warning Simulator</h1>
+        <p class="text-center mb-4">Practice handling master cautions and warnings. Click the Master button to acknowledge, then "Next" for a new scenario.</p>
+
+        <div class="flex justify-center gap-4 mb-4">
+          <div id="masterWarning" class="p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40" style="display: none;" onclick="acknowledgeAlert('Warning')">
+            MASTER WARNING
+          </div>
+          <div id="masterCaution" class="p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40" style="display: none;" onclick="acknowledgeAlert('Caution')">
+            MASTER CAUTION
+          </div>
+        </div>
+
+        <h2 class="text-xl font-semibold mb-2">PC-12 Annunciator Panel</h2>
+        <div id="annunciatorPanel" class="annunciator-grid single-panel-grid mb-4"></div>
+
+        <button onclick="generateScenario()" class="next-scenario-btn">Next Scenario</button>
+
+        <div class="message-container">
+          <div class="message-header">Scenario Information</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Description</div>
+              <div id="description" class="message-value">Click "Next Scenario" to start.</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Procedure</div>
+              <div id="procedure" class="message-value procedure-text">Awaiting scenario selection...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = 'all';
+
+    // Define light types based on your layout - using unique names for the two A/P TRIM lights
+    const warningLights = [
+      "PASS DOOR", "CAR DOOR", "CAB PRESS", "AIR GND", "PROP LOW P", "A/P TRIM WARNING", // Top right A/P TRIM
+      "ESNTL BUS", "AV BUS", "STAB TRIM", "OIL QTY", "ENG FIRE"
+    ];
+    
+    const cautionLights = [
+      "AD DISENG", "GEN 1 OFF", "GEN 2 OFF", "BUS TIE", "PUSHER", "FIRE DETECT", 
+      "PUSHER ICE MODE", "BAT OFF", "INVERTER", "BAT HOT", "FLAPS", "CHIP", 
+      "N ESNTL BUS", "L FUEL LOW", "FUEL PRESS", "HYDR", "ECS", "AOA DE IGE", 
+      "R FUEL LOW", "DE IGE"
+    ];
+    
+    const advisoryLights = [
+      "L FUEL PUMP", "PASS OXY", "INERT SEP", "PROBES DE IGE", "R FUEL PUMP",
+      "DE IGE BOOTS", "WSHLD HEAT", "PROP DE IGE"
+    ];
+
+    // Blue lights - these will highlight blue when active
+    const blueLights = ["IGNITION", "COOL", "A/P TRIM BLUE"]; // Bottom left A/P TRIM
+
+    const scenarios = [
+      // Warnings (Red)
+      {
+        type: "Warning",
+        name: "ENG FIRE",
+        description: "Engine fire detected.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "CAB PRESS",
+        description: "Cabin pressure warning.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "ESNTL BUS",
+        description: "Essential bus failure.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "PASS DOOR",
+        description: "Passenger door warning.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "CAR DOOR",
+        description: "Cargo door warning.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "AIR GND",
+        description: "Air/ground system warning.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "PROP LOW P",
+        description: "Propeller low pressure.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "A/P TRIM WARNING",
+        description: "Autopilot trim warning.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "AV BUS",
+        description: "Avionics bus failure.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "STAB TRIM",
+        description: "Stabilizer trim warning.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Warning",
+        name: "OIL QTY",
+        description: "Low oil quantity.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      // Cautions (Yellow)
+      {
+        type: "Caution",
+        name: "AD DISENG",
+        description: "Autopilot disengaged.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Caution",
+        name: "DE IGE",
+        description: "De-ice system active.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Caution",
+        name: "GEN 1 OFF",
+        description: "Generator 1 off.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Caution",
+        name: "GEN 2 OFF",
+        description: "Generator 2 off.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      // Advisories (Green)
+      {
+        type: "Advisory",
+        name: "L FUEL PUMP",
+        description: "Left fuel pump on.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "R FUEL PUMP",
+        description: "Right fuel pump on.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "PASS OXY",
+        description: "Passenger oxygen on.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "INERT SEP",
+        description: "Inertial separator active.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "PROBES DE IGE",
+        description: "Probe de-ice active.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "DE IGE BOOTS",
+        description: "De-ice boots active.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "WSHLD HEAT",
+        description: "Windshield heat on.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "PROP DE IGE",
+        description: "Propeller de-ice active.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      // Blue Lights
+      {
+        type: "Advisory",
+        name: "IGNITION",
+        description: "Ignition system active.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "COOL",
+        description: "Cooling system active.",
+        procedure: "PROCEDURES TO BE ADDED"
+      },
+      {
+        type: "Advisory",
+        name: "A/P TRIM BLUE",
+        description: "Autopilot trim active.",
+        procedure: "PROCEDURES TO BE ADDED"
+      }
+    ];
+
+    const annunciatorLayout = [
+      "PASS DOOR", "CAR DOOR", "CAB PRESS", "AIR GND", "PROP LOW P", "A/P TRIM WARNING", // Top right A/P TRIM (red)
+      "ESNTL BUS", "AV BUS", "STAB TRIM", "OIL QTY", "ENG FIRE", "AD DISENG",
+      "GEN 1 OFF", "GEN 2 OFF", "BUS TIE", "PUSHER", "FIRE DETECT", "PUSHER ICE MODE",
+      "BAT OFF", "INVERTER", "BAT HOT", "FLAPS", "CHIP", "N ESNTL BUS",
+      "L FUEL LOW", "FUEL PRESS", "HYDR", "ECS", "AOA DE IGE", "R FUEL LOW",
+      "L FUEL PUMP", "PASS OXY", "DE IGE", "INERT SEP", "PROBES DE IGE", "R FUEL PUMP",
+      "IGNITION", "DE IGE BOOTS", "WSHLD HEAT", "PROP DE IGE", "COOL", "A/P TRIM BLUE" // Bottom left A/P TRIM (blue)
+    ];
+
+    function initializeAnnunciatorPanel() {
+      const annunciatorPanel = document.getElementById('annunciatorPanel');
+      annunciatorPanel.innerHTML = '';
+
+      annunciatorLayout.forEach(light => {
+        const div = document.createElement('div');
+        div.className = 'annunciator-light';
+        div.id = `light-${light.replace(/\s+/g, '-')}`;
+        // Display text without the color suffix for cleaner look
+        const displayText = light.replace(' WARNING', '').replace(' BLUE', '');
+        div.textContent = displayText || '———';
+        annunciatorPanel.appendChild(div);
+      });
+    }
+
+    function updateMode() {
+      currentMode = document.getElementById('modeSelect').value;
+      generateScenario();
+    }
+
+    function generateScenario() {
+      let filteredScenarios = scenarios;
+      if (currentMode === 'warnings') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Warning');
+      } else if (currentMode === 'cautions') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Caution');
+      } else if (currentMode === 'advisories') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Advisory');
+      }
+      if (filteredScenarios.length === 0) {
+        document.getElementById('description').textContent = 'No scenarios available in this mode.';
+        document.getElementById('procedure').textContent = '';
+        return;
+      }
+      const scenario = filteredScenarios[Math.floor(Math.random() * filteredScenarios.length)];
+      const masterCaution = document.getElementById('masterCaution');
+      const masterWarning = document.getElementById('masterWarning');
+      const description = document.getElementById('description');
+      const procedure = document.getElementById('procedure');
+
+      // Reset all annunciator lights
+      annunciatorLayout.forEach(light => {
+        const lightElement = document.getElementById(`light-${light.replace(/\s+/g, '-')}`);
+        if (lightElement) {
+          lightElement.className = 'annunciator-light';
+        }
+      });
+
+      // Activate the specific annunciator light with correct color
+      const lightElement = document.getElementById(`light-${scenario.name.replace(/\s+/g, '-')}`);
+      if (lightElement) {
+        let activeClass = 'annunciator-light animate-pulse ';
+        
+        if (blueLights.includes(scenario.name)) {
+          activeClass += 'active-blue';
+        } else if (warningLights.includes(scenario.name)) {
+          activeClass += 'active-warning';
+        } else if (cautionLights.includes(scenario.name)) {
+          activeClass += 'active-caution';
+        } else if (advisoryLights.includes(scenario.name)) {
+          activeClass += 'active-advisory';
+        }
+        
+        lightElement.className = activeClass;
+      }
+
+      // Update master buttons (no master for advisories or blue lights)
+      masterCaution.style.display = scenario.type === 'Caution' ? 'block' : 'none';
+      masterWarning.style.display = scenario.type === 'Warning' ? 'block' : 'none';
+      masterCaution.className = `p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40 ${
+        scenario.type === 'Caution' ? 'bg-yellow-500 animate-pulse' : ''
+      }`;
+      masterWarning.className = `p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40 ${
+        scenario.type === 'Warning' ? 'bg-red-500 animate-pulse' : ''
+      }`;
+
+      // Update description and procedure
+      description.textContent = scenario.description;
+      procedure.textContent = scenario.procedure;
+    }
+
+    function acknowledgeAlert(type) {
+      const masterCaution = document.getElementById('masterCaution');
+      const masterWarning = document.getElementById('masterWarning');
+      const activeLight = document.querySelector('.annunciator-light.animate-pulse');
+
+      if (type === 'Caution') {
+        masterCaution.classList.remove('animate-pulse');
+        masterCaution.classList.add('opacity-75');
+      } else if (type === 'Warning') {
+        masterWarning.classList.remove('animate-pulse');
+        masterWarning.classList.add('opacity-75');
+      }
+
+      if (activeLight) {
+        activeLight.classList.remove('animate-pulse');
+        activeLight.classList.add('opacity-75');
+      }
+    }
+
+    // Initialize the annunciator panel on page load
+    initializeAnnunciatorPanel();
+  </script>
+</body>
+</html>
