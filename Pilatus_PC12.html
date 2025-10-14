@@ -26,7 +26,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a233[...]
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g></svg>') center/cover no-repeat;
       opacity: 0.35;
       filter: blur(12px) brightness(0.8);
     }
@@ -192,11 +192,12 @@
         <option value="warnings">Warnings Only</option>
         <option value="cautions">Cautions Only</option>
         <option value="advisories">Advisories Only</option>
+        <option value="deice">De-ice Scenarios</option>
       </select>
       
       <a href="index.html" class="home-btn w-full justify-center mt-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-[...]
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
         </svg>
         Back to Home
       </a>
@@ -267,160 +268,185 @@
         type: "Warning",
         name: "ENG FIRE",
         description: "Engine fire detected.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Condition Lever ...... FUEL CUTOFF\n2. Firewall Shutoff Valve ...... CLOSE\n3. Fire Extinguisher (if installed) (if fire warning persists) ...... ACTUATE\n4. Generator ...... OFF\n5. Auto Ignition ...... OFF\n6. Electrical Load ...... MONITOR"
       },
       {
         type: "Warning",
         name: "CAB PRESS",
         description: "Cabin pressure warning.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Oxygen Mask(s) ...... DON\n2. Mic Switch(es) ...... OXY\n3. Passenger Manual Drop-Out ...... PULL ON\n4. Descend ...... AS REQUIRED\n5. Range ...... DETERMINE FOR FINAL CRUISE ALTITUDE\n6. Oxygen Duration ...... CONFIRM"
       },
       {
         type: "Warning",
         name: "ESNTL BUS",
         description: "Essential bus failure.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Check essential bus power source\n2. Monitor electrical system\n3. Reduce electrical load if necessary\n4. Prepare for emergency landing"
       },
       {
         type: "Warning",
         name: "PASS DOOR",
         description: "Passenger door warning.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. All Occupants ...... SEATED WITH SEAT BELTS SECURELY FASTENED\n2. Cabin Sign ...... NO SMOKE AND FSB\n3. Cabin Differential Pressure ...... REDUCE TO LOWEST VALUE PRACTICAL\n4. Oxygen ...... AS REQUIRED\n5. Land ...... NEAREST SUITABLE AIRPORT"
       },
       {
         type: "Warning",
         name: "CAR DOOR",
         description: "Cargo door warning.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. All Occupants ...... SEATED WITH SEAT BELTS SECURELY FASTENED\n2. Cabin Sign ...... NO SMOKE AND FSB\n3. Cabin Differential Pressure ...... REDUCE TO LOWEST VALUE PRACTICAL\n4. Oxygen ...... AS REQUIRED\n5. Land ...... NEAREST SUITABLE AIRPORT"
       },
       {
         type: "Warning",
         name: "AIR GND",
         description: "Air/ground system warning.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Verify air/ground system status\n2. Check landing gear position\n3. Prepare for manual gear extension if needed"
       },
       {
         type: "Warning",
         name: "PROP LOW P",
         description: "Propeller low pressure.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Check propeller system\n2. Reduce power if necessary\n3. Monitor engine parameters\n4. Prepare for emergency landing"
       },
       {
         type: "Warning",
         name: "A/P TRIM WARNING",
         description: "Autopilot trim warning.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Flight Controls ...... HOLD FIRMLY\n2. A/P ...... DISENGAGE\n3. Retrim airplane if necessary\n4. A/P ...... REENGAGE (if desired)"
       },
       {
         type: "Warning",
         name: "AV BUS",
         description: "Avionics bus failure.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Check avionics bus power source\n2. Reduce electrical load if necessary\n3. Switch to backup systems if available"
       },
       {
         type: "Warning",
         name: "STAB TRIM",
         description: "Stabilizer trim warning.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Check stabilizer trim position\n2. Use manual trim if necessary\n3. Monitor flight controls"
       },
       {
         type: "Warning",
         name: "OIL QTY",
         description: "Low oil quantity.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Oil Pressure ...... CONFIRM\n2. Engine ...... SECURE if confirmed\n3. Land at the nearest suitable airport"
       },
       // Cautions (Yellow)
       {
         type: "Caution",
         name: "AD DISENG",
         description: "Autopilot disengaged.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Maintain airplane control\n2. Determine cause of disengagement\n3. A/P and YD ...... AS REQUIRED"
       },
       {
         type: "Caution",
         name: "DE ICE",
         description: "De-ice system active.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor icing conditions\n2. Check de-ice system operation\n3. Adjust power settings if necessary"
       },
       {
         type: "Caution",
         name: "GEN 1 OFF",
         description: "Generator 1 off.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Generator ...... RESET, THEN ON\n2. If generator will not reset:\n   Operating Generator Loadmeter ...... DO NOT EXCEED 100%\n   Inoperative Generator ...... OFF"
       },
       {
         type: "Caution",
         name: "GEN 2 OFF",
         description: "Generator 2 off.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Generator ...... RESET, THEN ON\n2. If generator will not reset:\n   Operating Generator Loadmeter ...... DO NOT EXCEED 100%\n   Inoperative Generator ...... OFF"
       },
       // Advisories (Green)
       {
         type: "Advisory",
         name: "L FUEL PUMP",
         description: "Left fuel pump on.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor fuel system\n2. Check fuel quantity\n3. Turn off when not needed"
       },
       {
         type: "Advisory",
         name: "R FUEL PUMP",
         description: "Right fuel pump on.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor fuel system\n2. Check fuel quantity\n3. Turn off when not needed"
       },
       {
         type: "Advisory",
         name: "PASS OXY",
         description: "Passenger oxygen on.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Check cabin altitude\n2. Ensure passengers are using masks if required\n3. Descend if necessary"
       },
       {
         type: "Advisory",
         name: "INERT SEP",
         description: "Inertial separator active.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor engine performance\n2. Check for icing conditions\n3. Turn off when not needed"
       },
       {
         type: "Advisory",
         name: "PROBES DE ICE",
         description: "Probe de-ice active.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor for icing conditions\n2. Check probe heating system\n3. Turn off when not needed"
       },
       {
         type: "Advisory",
         name: "DE ICE BOOTS",
         description: "De-ice boots active.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor for icing conditions\n2. Check boot inflation system\n3. Turn off when not needed"
       },
       {
         type: "Advisory",
         name: "WSHLD HEAT",
         description: "Windshield heat on.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor windshield temperature\n2. Check for icing conditions\n3. Turn off when not needed"
       },
       {
         type: "Advisory",
         name: "PROP DE ICE",
         description: "Propeller de-ice active.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor for icing conditions\n2. Check propeller de-ice system\n3. Turn off when not needed"
       },
       // Blue Lights
       {
         type: "Advisory",
         name: "IGNITION",
         description: "Ignition system active.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Verify ignition status\n2. Monitor engine performance\n3. Turn off when not needed"
       },
       {
         type: "Advisory",
         name: "COOL",
         description: "Cooling system active.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor cabin temperature\n2. Check cooling system operation\n3. Adjust as needed"
       },
       {
         type: "Advisory",
         name: "A/P TRIM BLUE",
         description: "Autopilot trim active.",
-        procedure: "PROCEDURES TO BE ADDED"
+        procedure: "1. Monitor autopilot system\n2. Check trim position\n3. Disengage if necessary"
+      }
+    ];
+
+    // Special de-ice scenarios
+    const deiceScenarios = [
+      {
+        type: "Deice",
+        name: "PROP DE ICE",
+        description: "Propeller de-ice system activated in icing conditions.",
+        procedure: "1. Monitor icing conditions\n2. Check propeller de-ice system\n3. Turn off when not needed",
+        relatedLights: ["PROP DE ICE", "DE ICE"]
+      },
+      {
+        type: "Deice",
+        name: "DE ICE BOOTS",
+        description: "Wing de-ice boots activated in icing conditions.",
+        procedure: "1. Monitor icing conditions\n2. Check boot inflation system\n3. Turn off when not needed",
+        relatedLights: ["DE ICE BOOTS", "DE ICE"]
+      },
+      {
+        type: "Deice",
+        name: "BOTH DE ICE",
+        description: "Both propeller and wing de-ice systems activated in severe icing conditions.",
+        procedure: "1. Monitor severe icing conditions\n2. Check both de-ice systems\n3. Consider exiting icing conditions\n4. Turn off systems when not needed",
+        relatedLights: ["PROP DE ICE", "DE ICE BOOTS", "DE ICE"]
       }
     ];
 
@@ -462,12 +488,16 @@
         filteredScenarios = scenarios.filter(s => s.type === 'Caution');
       } else if (currentMode === 'advisories') {
         filteredScenarios = scenarios.filter(s => s.type === 'Advisory');
+      } else if (currentMode === 'deice') {
+        filteredScenarios = deiceScenarios;
       }
+      
       if (filteredScenarios.length === 0) {
         document.getElementById('description').textContent = 'No scenarios available in this mode.';
         document.getElementById('procedure').textContent = '';
         return;
       }
+      
       const scenario = filteredScenarios[Math.floor(Math.random() * filteredScenarios.length)];
       const masterCaution = document.getElementById('masterCaution');
       const masterWarning = document.getElementById('masterWarning');
@@ -482,29 +512,51 @@
         }
       });
 
-      // Activate the specific annunciator light with correct color
-      const lightElement = document.getElementById(`light-${scenario.name.replace(/\s+/g, '-')}`);
-      if (lightElement) {
-        let activeClass = 'annunciator-light animate-pulse ';
-        
-        if (blueLights.includes(scenario.name)) {
-          activeClass += 'active-blue';
-        } else if (warningLights.includes(scenario.name)) {
-          activeClass += 'active-warning';
-        } else if (cautionLights.includes(scenario.name)) {
-          activeClass += 'active-caution';
-        } else if (advisoryLights.includes(scenario.name)) {
-          activeClass += 'active-advisory';
+      // Handle special de-ice scenarios
+      if (currentMode === 'deice' && scenario.relatedLights) {
+        scenario.relatedLights.forEach(lightName => {
+          const lightElement = document.getElementById(`light-${lightName.replace(/\s+/g, '-')}`);
+          if (lightElement) {
+            let activeClass = 'annunciator-light animate-pulse ';
+            
+            if (blueLights.includes(lightName)) {
+              activeClass += 'active-blue';
+            } else if (warningLights.includes(lightName)) {
+              activeClass += 'active-warning';
+            } else if (cautionLights.includes(lightName)) {
+              activeClass += 'active-caution';
+            } else if (advisoryLights.includes(lightName)) {
+              activeClass += 'active-advisory';
+            }
+            
+            lightElement.className = activeClass;
+          }
+        });
+      } else {
+        // Standard scenario handling
+        const lightElement = document.getElementById(`light-${scenario.name.replace(/\s+/g, '-')}`);
+        if (lightElement) {
+          let activeClass = 'annunciator-light animate-pulse ';
+          
+          if (blueLights.includes(scenario.name)) {
+            activeClass += 'active-blue';
+          } else if (warningLights.includes(scenario.name)) {
+            activeClass += 'active-warning';
+          } else if (cautionLights.includes(scenario.name)) {
+            activeClass += 'active-caution';
+          } else if (advisoryLights.includes(scenario.name)) {
+            activeClass += 'active-advisory';
+          }
+          
+          lightElement.className = activeClass;
         }
-        
-        lightElement.className = activeClass;
       }
 
-      // Update master buttons (no master for advisories or blue lights)
-      masterCaution.style.display = scenario.type === 'Caution' ? 'block' : 'none';
+      // Update master buttons (no master for advisories, blue lights, or de-ice scenarios)
+      masterCaution.style.display = (scenario.type === 'Caution' || scenario.type === 'Deice') ? 'block' : 'none';
       masterWarning.style.display = scenario.type === 'Warning' ? 'block' : 'none';
       masterCaution.className = `p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40 ${
-        scenario.type === 'Caution' ? 'bg-yellow-500 animate-pulse' : ''
+        (scenario.type === 'Caution' || scenario.type === 'Deice') ? 'bg-yellow-500 animate-pulse' : ''
       }`;
       masterWarning.className = `p-4 rounded text-center text-white font-bold text-lg cursor-pointer w-40 ${
         scenario.type === 'Warning' ? 'bg-red-500 animate-pulse' : ''
@@ -518,7 +570,7 @@
     function acknowledgeAlert(type) {
       const masterCaution = document.getElementById('masterCaution');
       const masterWarning = document.getElementById('masterWarning');
-      const activeLight = document.querySelector('.annunciator-light.animate-pulse');
+      const activeLights = document.querySelectorAll('.annunciator-light.animate-pulse');
 
       if (type === 'Caution') {
         masterCaution.classList.remove('animate-pulse');
@@ -528,10 +580,10 @@
         masterWarning.classList.add('opacity-75');
       }
 
-      if (activeLight) {
-        activeLight.classList.remove('animate-pulse');
-        activeLight.classList.add('opacity-75');
-      }
+      activeLights.forEach(light => {
+        light.classList.remove('animate-pulse');
+        light.classList.add('opacity-75');
+      });
     }
 
     // Initialize the annunciator panel on page load
