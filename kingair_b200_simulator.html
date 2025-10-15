@@ -553,26 +553,28 @@
       warningPanel.innerHTML = '';
       cautionAdvisoryPanel.innerHTML = '';
 
-      annunciatorLayout.warnings.forEach(light => {
-        const div = document.createElement('div');
-        div.className = 'annunciator-light';
-        div.id = `light-${light.replace(/\s+/g, '-')}`;
-        div.textContent = light || '———';
-        
-        // Make L FUEL PRESS and R FUEL PRESS interactive
-        if (light === "L FUEL PRESS" || light === "R FUEL PRESS") {
-          div.classList.add('interactive');
-          div.addEventListener('click', function() {
-            if (light === "L FUEL PRESS") {
-              window.location.href = 'fuel_press_left.html';
-            } else if (light === "R FUEL PRESS") {
-              window.location.href = 'fuel_press_right.html';
-            }
-          });
-        }
-        
-        warningPanel.appendChild(div);
-      });
+annunciatorLayout.warnings.forEach(light => {
+  const div = document.createElement('div');
+  div.className = 'annunciator-light';
+  div.id = `light-${light.replace(/\s+/g, '-')}`;
+  div.textContent = light || '———';
+  
+  // Make L FUEL PRESS, R FUEL PRESS, and INVERTER interactive
+  if (light === "L FUEL PRESS" || light === "R FUEL PRESS" || light === "INVERTER") {
+    div.classList.add('interactive');
+    div.addEventListener('click', function() {
+      if (light === "L FUEL PRESS") {
+        window.location.href = 'fuel_press_left.html';
+      } else if (light === "R FUEL PRESS") {
+        window.location.href = 'fuel_press_right.html';
+      } else if (light === "INVERTER") {
+        window.location.href = 'inverter_warning.html';
+      }
+    });
+  }
+  
+  warningPanel.appendChild(div);
+});
 
       annunciatorLayout.cautionAdvisory.forEach(light => {
         const div = document.createElement('div');
