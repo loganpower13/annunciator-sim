@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INVERTER Warning | King Air B200</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* Annunciator Panel Background */
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    /* Home button styling */
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Warning highlight */
+    .warning-highlight {
+      background-color: rgba(220, 38, 38, 0.2);
+      border-left: 4px solid #dc2626;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Memory item styling */
+    .memory-item {
+      background-color: rgba(220, 38, 38, 0.3);
+      border: 2px solid #dc2626;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+    
+    /* Checklist formatting */
+    .checklist-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .checklist-action {
+      flex: 1;
+    }
+    
+    .checklist-dots {
+      flex-grow: 1;
+      border-bottom: 1px dotted #94a3b8;
+      margin: 0 0.5rem;
+      position: relative;
+      top: -4px;
+    }
+    
+    .checklist-result {
+      min-width: 150px;
+    }
+    
+    .content-section {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .section-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Annunciator Panel Background -->
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container min-h-screen p-6">
+    <div class="sim-card">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">INVERTER Warning</h1>
+        <a href="kingair_b200_simulator.html" class="home-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          Back to Simulator
+        </a>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header">Emergency Checklist</div>
+        <div class="memory-item">
+          <div class="checklist-item">
+            <div class="checklist-action">Inverter</div>
+            <div class="checklist-dots"></div>
+            <div class="checklist-result">SELECT OTHER</div>
+          </div>
+        </div>
+        <div class="checklist-item">
+          <div class="checklist-action">INVERTER Annunciator</div>
+          <div class="checklist-dots"></div>
+          <div class="checklist-result">EXTINGUISHED</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header">System Information</div>
+        <div class="space-y-4">
+          <div>
+            <h3 class="font-semibold text-lg mb-2">System Overview</h3>
+            <p>The King Air B200 has two inverters that provide AC power for avionics equipment and engine instruments. Each inverter supplies both 115-volt and 26-volt, 400-Hertz power.</p>
+          </div>
+          
+          <div>
+            <h3 class="font-semibold text-lg mb-2">Components Involved</h3>
+            <ul class="list-disc list-inside space-y-2">
+              <li><strong>Two Inverters:</strong> Located in wing center section outboard of each nacelle</li>
+              <li><strong>INVERTER Select Switch:</strong> On pilot's left subpanel controls inverter selection</li>
+              <li><strong>Volt-Frequency Meter:</strong> Monitors inverter output (105-120 VAC, 380-420 Hz)</li>
+              <li><strong>Inverter Power Relay:</strong> Activates when inverter is selected</li>
+            </ul>
+          </div>
+          
+          <div class="warning-highlight">
+            <strong>OPERATIONAL REQUIREMENT:</strong> Due to avionics equipment requirements, the 115-volt inverter output must be maintained at 105-120 VAC, 380-420 Hz.
+          </div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header">Normal Operation</div>
+        <div class="space-y-3">
+          <p>• Turn the INVERTER select switch to either inverter position</p>
+          <p>• Verify the INVERTER warning light extinguishes</p>
+          <p>• Monitor the VOLT-FREQ meter for proper output</p>
+          <p>• Only one inverter operates at a time</p>
+          <p>• Inverter operation is controlled by the INVERTER select switch on pilot's left subpanel</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header">Additional Notes</div>
+        <div class="space-y-3">
+          <p>• The red INVERTER warning light illuminates when the active inverter fails</p>
+          <p>• Selection of the alternate inverter should immediately resolve the issue</p>
+          <p>• Both inverters are identical and either can power all AC systems</p>
+          <p>• Inverters are powered from the generator buses through current limiters</p>
+          <p>• Monitor electrical loads when operating on single inverter</p>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header">Circuit Protection</div>
+        <div class="space-y-3">
+          <p><strong>INVERTER CONTROL Circuit Breakers:</strong></p>
+          <ul class="list-disc list-inside ml-4 space-y-1">
+            <li>No. 1 INVERTER CONTROL - 5 AMP (Right Side Panel)</li>
+            <li>No. 2 INVERTER CONTROL - 5 AMP (Right Side Panel)</li>
+          </ul>
+          <p class="mt-2 text-sm text-gray-300">These protect the inverter control switches and control relays.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
