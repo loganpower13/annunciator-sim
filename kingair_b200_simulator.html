@@ -63,6 +63,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: default;
+    }
+    .annunciator-light.interactive {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .annunciator-light.interactive:hover {
+      background-color: #333;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
     }
     .annunciator-light.active-warning {
       background-color: #dc2626;
@@ -549,6 +558,19 @@
         div.className = 'annunciator-light';
         div.id = `light-${light.replace(/\s+/g, '-')}`;
         div.textContent = light || '———';
+        
+        // Make L FUEL PRESS and R FUEL PRESS interactive
+        if (light === "L FUEL PRESS" || light === "R FUEL PRESS") {
+          div.classList.add('interactive');
+          div.addEventListener('click', function() {
+            if (light === "L FUEL PRESS") {
+              window.location.href = 'fuel_press_left.html';
+            } else if (light === "R FUEL PRESS") {
+              window.location.href = 'fuel_press_right.html';
+            }
+          });
+        }
+        
         warningPanel.appendChild(div);
       });
 
