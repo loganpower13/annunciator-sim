@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engine Fire Warning | King Air B200</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* Annunciator Panel Background - Fixed Size */
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g><g fill="%23f59e0b" font-family="monospace" font-size="14"><text x="120" y="125">L. DC GEN</text><text x="120" y="175">HYD FLUID LOW</text><text x="120" y="225">RVS NOT READY</text><text x="120" y="275">R. DC GEN</text><text x="120" y="325">L. CHIP DETECT</text><text x="120" y="375">DUCT OVERTEMP</text><text x="120" y="425">R. CHIP DETECT</text><text x="120" y="475">L. ENG ICE FAIL</text><text x="450" y="125">L ENG FIRE</text><text x="450" y="175">DOOR UNLOCKED</text><text x="450" y="225">ALT WARN</text><text x="450" y="275">R ENG FIRE</text><text x="450" y="325">L FUEL PRESS</text><text x="450" y="375">L OIL PRESS</text><text x="450" y="425">R FUEL PRESS</text><text x="450" y="475">R OIL PRESS</text></g><g fill="%23ef4444"><circle cx="90" cy="120" r="6"/><circle cx="90" cy="220" r="6"/><circle cx="90" cy="320" r="6"/><circle cx="90" cy="420" r="6"/><circle cx="420" cy="120" r="6"/><circle cx="420" cy="220" r="6"/><circle cx="420" cy="320" r="6"/><circle cx="420" cy="420" r="6"/></g><g fill="%2310b981"><circle cx="90" cy="170" r="6"/><circle cx="90" cy="270" r="6"/><circle cx="90" cy="370" r="6"/><circle cx="90" cy="470" r="6"/><circle cx="420" cy="170" r="6"/><circle cx="420" cy="270" r="6"/><circle cx="420" cy="370" r="6"/><circle cx="420" cy="470" r="6"/></g></svg>') center/contain no-repeat;
+      opacity: 0.25;
+      filter: blur(8px) brightness(0.8);
+    }
+
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    
+    /* Home button styling */
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Improved message section styling */
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    /* Warning highlight */
+    .warning-highlight {
+      background-color: rgba(220, 38, 38, 0.2);
+      border-left: 4px solid #dc2626;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Memory item styling */
+    .memory-item {
+      background-color: rgba(220, 38, 38, 0.3);
+      border: 2px solid #dc2626;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+    
+    /* Checklist formatting */
+    .checklist-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .checklist-action {
+      flex: 1;
+    }
+    
+    .checklist-dots {
+      flex-grow: 1;
+      border-bottom: 1px dotted #94a3b8;
+      margin: 0 0.5rem;
+      position: relative;
+      top: -4px;
+    }
+    
+    .checklist-result {
+      min-width: 150px;
+    }
+    
+    /* Fire-specific styling - EXACT MATCH TO YOUR IMAGE */
+    .fire-warning {
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(153, 27, 27, 0.3));
+      border: 2px solid #dc2626;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+    }
+    
+    .fire-panel {
+      background: #1a1a1a;
+      border: 2px solid #404040;
+      border-radius: 0.375rem;
+      padding: 1.5rem;
+      margin: 1rem auto;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      max-width: 300px;
+    }
+    
+    .fire-panel-main {
+      color: #ff4444;
+      font-weight: bold;
+      font-size: 1.25rem;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .fire-panel-lights {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+    
+    .fire-light-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .fire-light {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      margin-bottom: 0.5rem;
+      border: 1px solid #666;
+    }
+    
+    .light-amber {
+      background-color: #ffa500;
+      box-shadow: 0 0 12px #ffa500;
+    }
+    
+    .light-green {
+      background-color: #00ff00;
+      box-shadow: 0 0 12px #00ff00;
+    }
+    
+    .fire-light-label {
+      color: #cccccc;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    
+    /* Pressure table styling */
+    .pressure-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.875rem;
+    }
+    
+    .pressure-table th, .pressure-table td {
+      border: 1px solid #374151;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    
+    .pressure-table th {
+      background-color: #1e293b;
+      color: #60a5fa;
+    }
+    
+    .pressure-table td {
+      background-color: rgba(30, 41, 59, 0.5);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Annunciator Panel Background - Now properly sized -->
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar w-64 p-4 bg-gray-100 text-gray-800">
+      <h2 class="text-lg font-bold mb-4">Engine Fire Warning</h2>
+      
+      <!-- Navigation Links -->
+      <div class="space-y-2 mb-6">
+        <a href="kingair_b200_simulator.html" class="home-btn w-full justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          Back to Simulator
+        </a>
+        
+        <div class="bg-red-100 border border-red-300 rounded p-3">
+          <div class="font-bold text-red-700">Warning Pages</div>
+          <div class="mt-2 space-y-1">
+            <a href="eng_fire_left.html" class="block p-2 bg-red-50 rounded hover:bg-red-100 text-red-700">L ENG FIRE</a>
+            <a href="eng_fire_right.html" class="block p-2 bg-red-50 rounded hover:bg-red-100 text-red-700">R ENG FIRE</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Reference -->
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <div class="font-bold text-blue-700">Quick Reference</div>
+        <ul class="mt-2 text-sm space-y-1">
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Temperature-sensing cable triggers warning</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Confirm fire before activating extinguisher</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Extinguisher can be used only once between recharges</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Powered from hot battery bus - always available</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="main-content flex-1 p-6">
+      <div class="sim-card">
+        <h1 class="text-2xl font-bold mb-2"><span id="warningSide">L ENG FIRE</span> Warning</h1>
+        <p class="text-center mb-6 text-gray-300">Understanding and responding to <span id="warningSideLower">L ENG FIRE</span> warnings in the Super King Air 200/B200</p>
+
+        <div class="fire-warning">
+          <div class="flex items-center justify-center mb-4">
+            <!-- Fire Warning Panel - EXACT MATCH TO YOUR IMAGE -->
+            <div class="fire-panel">
+              <div class="fire-panel-main">
+                <span id="panelSide">L ENG FIRE</span><br>
+                PUSH TO EXT
+              </div>
+              <div class="fire-panel-lights">
+                <div class="fire-light-container">
+                  <div class="fire-light light-amber"></div>
+                  <div class="fire-light-label">D</div>
+                </div>
+                <div class="fire-light-container">
+                  <div class="fire-light light-green"></div>
+                  <div class="fire-light-label">OK</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="text-red-200 text-center">Fire detected in the <span id="engineSide">left</span> engine nacelle. Immediate action required.</p>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Warning Description</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Annunciator</div>
+              <div class="message-value flex items-center">
+                <div class="w-4 h-4 rounded-full bg-red-500 mr-3"></div>
+                <span id="warningSideText">L ENG FIRE</span>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Condition</div>
+              <div class="message-value">Fire detected in the <span id="engineSide2">left</span> engine nacelle by temperature-sensing cable or flame detectors</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Detection System</div>
+              <div class="message-value">
+                <p><strong>BB-1439, BB-1444 and after:</strong> Temperature-sensing cable for each engine</p>
+                <p class="mt-2"><strong>Prior to BB-1444 (except 1439):</strong> Three photoconductive detectors per engine feeding control amplifiers</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Emergency Checklist</div>
+          <div class="message-content">
+            <div class="memory-item">
+              <div class="checklist-item">
+                <div class="checklist-action">Affected Engine: Condition Lever</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">FUEL CUT OFF</div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-action">Propeller Lever</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">FEATHER</div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-action">Firewall Shutoff Valve</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">CLOSED</div>
+              </div>
+            </div>
+            <div class="warning-highlight">
+              <strong>NOTE:</strong> Look for confirmation of fire prior to activating fire extinguisher. Confirmation signs include:
+              <ul class="mt-2 ml-4 list-disc">
+                <li>Visible fire or smoke from engine nacelle</li>
+                <li>Increase in oil temperature or decrease in oil pressure</li>
+                <li>Increase in ITT or decrease in torque</li>
+              </ul>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Fire Extinguisher (If Installed)</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">ACTUATE (if required)</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Auto Ignition</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">OFF</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Generator</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">OFF</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Prop Sync</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">OFF</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Electrical Load</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">MONITOR</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Fire Detection System</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">System Components</div>
+              <div class="message-value">
+                <p><strong>BB-1439, BB-1444 and after:</strong> Temperature-sensing cable for each engine; two red warning annunciators (L ENG FIRE and R ENG FIRE); test switch on copilot's left subpanel; FIRE DET circuit breaker on right side panel (No. 1 dual fed bus).</p>
+                <p class="mt-2"><strong>Prior to BB-1444 (except 1439):</strong> Three photoconductive detectors per engine feeding control amplifiers. Left amplifier controls FIRE L ENG light; right amplifier controls FIRE R ENG light.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Indications</div>
+              <div class="message-value">
+                <p>When the temperature-sensing cable is activated or light threshold is reached:</p>
+                <ul class="mt-2 ml-4 list-disc">
+                  <li>Appropriate light on warning annunciator panel illuminates</li>
+                  <li>With extinguisher system: L or R ENG FIRE PUSH TO EXT switchlights on glareshield illuminate</li>
+                </ul>
+                <div class="warning-highlight mt-2">
+                  <strong>NOTE:</strong> Prior to BB-1444 (except 1439), system may be set off by sunlight entering nacelle openings at appropriate angles.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">System Recovery</div>
+              <div class="message-value">
+                <p>Assuming integrity of wiring or sensor cable is maintained and fire extinguishes, the warning light will extinguish. Both systems can again detect outbreak of fire.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Fire Extinguishing System</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Extinguishing Agent</div>
+              <div class="message-value">
+                <p>Fire in engine compartment is smothered by engulfing nacelle with <strong>bromotrifluoromethane (CBrF₃)</strong> pressurized with dry nitrogen.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">System Components</div>
+              <div class="message-value">
+                <p><strong>Three spray bars per engine compartment</strong>, each supplied by one common fire extinguisher supply cylinder per engine. One squib per bottle incorporates pyrotechnic cartridge that releases entire contents.</p>
+                <p class="mt-2">Each engine has independent system. Both circuit breakers fed from hot battery bus.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Controls and Indications</div>
+              <div class="message-value">
+                <p>Three-lens control indicator on glareshield (when optional extinguisher installed):</p>
+                <ul class="mt-2 ml-4 list-disc">
+                  <li><span class="text-red-400 font-semibold">Red</span> — L (or R) ENG FIRE PUSH TO EXT (indicates detected fire)</li>
+                  <li><span class="text-yellow-400 font-semibold">Amber</span> — D (indicates extinguisher discharged, cylinder empty)</li>
+                  <li><span class="text-green-400 font-semibold">Green</span> — OK (confirms circuit continuity during test)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Operation</div>
+              <div class="message-value">
+                <p>When red warning indicates fire and confirmed by pilot:</p>
+                <ol class="mt-2 ml-4 list-decimal">
+                  <li>Shut down appropriate (L or R) engine</li>
+                  <li>Depress fire-extinguishing switchlight</li>
+                  <li>This fires appropriate squib, releasing contents through tubing</li>
+                  <li>When bottle discharged, amber D light illuminates</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">System Testing</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Detection System Test</div>
+              <div class="message-value">
+                <p>Rotary test switch allows ground or inflight testing:</p>
+                <ul class="mt-2 ml-4 list-disc">
+                  <li><strong>BB-1439, 1444 and after:</strong> Switch in DET L or DET R position illuminates corresponding ENG FIRE light</li>
+                  <li><strong>Prior to BB-1444 (except 1439):</strong> Four-position rotary switch tests each detection section individually</li>
+                </ul>
+                <p class="mt-2">During testing, pilot's and copilot's red MASTER WARNING light flashes. If extinguisher installed, red lenses placarded L ENG FIRE–PUSH TO EXT and R ENGINE FIRE–PUSH TO EXT illuminate.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Extinguishing System Test</div>
+              <div class="message-value">
+                <p>For testing extinguishing systems, rotate TEST SWITCH FIRE DET and FIRE EXT through LEFT and RIGHT EXT positions:</p>
+                <ul class="mt-2 ml-4 list-disc">
+                  <li>Amber D light and green OK light should illuminate</li>
+                  <li>Indicates bottle charge detector circuitry and squib-firing circuitry operational</li>
+                  <li>Confirms squib is in place</li>
+                </ul>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Troubleshooting</div>
+              <div class="message-value">
+                <div class="warning-highlight">
+                  <strong>NO-GO CONDITION:</strong> If fire detection annunciators fail to illuminate during testing, malfunction exists in that system. If no response in any position, check circuit breaker.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Limitations & Portable Equipment</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">System Availability</div>
+              <div class="message-value">
+                <p>Detection system operable when electrical power applied to aircraft. Extinguishing system can be discharged at any time since operated from hot battery bus.</p>
+                <div class="warning-highlight mt-2">
+                  <strong>LIMITATION:</strong> Each engine has self-contained extinguishing system that can be used only once between recharging. Cannot be used to extinguish fire in opposite engine.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Portable Fire Extinguishers</div>
+              <div class="message-value">
+                <p>Two portable fire extinguishers installed in aircraft:</p>
+                <ul class="mt-2 ml-4 list-disc">
+                  <li><strong>Cabin:</strong> Normally on floor on left side forward of airstair entrance door, aft of rearmost seat</li>
+                  <li><strong>Cockpit:</strong> Underneath copilot's seat</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Set the specific warning side based on which page we're on
+    document.addEventListener('DOMContentLoaded', function() {
+      const path = window.location.pathname;
+      const warningSideElement = document.getElementById('warningSide');
+      const warningSideLowerElement = document.getElementById('warningSideLower');
+      const warningSideTextElement = document.getElementById('warningSideText');
+      const engineSideElement = document.getElementById('engineSide');
+      const engineSideElement2 = document.getElementById('engineSide2');
+      const panelSideElement = document.getElementById('panelSide');
+      
+      if (path.includes('eng_fire_left.html') || path === '/eng_fire_left.html' || !path.includes('eng_fire_right')) {
+        // Left engine fire page
+        warningSideElement.textContent = 'L ENG FIRE';
+        warningSideLowerElement.textContent = 'L ENG FIRE';
+        warningSideTextElement.textContent = 'L ENG FIRE';
+        engineSideElement.textContent = 'left';
+        engineSideElement2.textContent = 'left';
+        panelSideElement.textContent = 'L ENG FIRE';
+        document.title = 'L ENG FIRE Warning | King Air B200';
+      } else {
+        // Right engine fire page
+        warningSideElement.textContent = 'R ENG FIRE';
+        warningSideLowerElement.textContent = 'R ENG FIRE';
+        warningSideTextElement.textContent = 'R ENG FIRE';
+        engineSideElement.textContent = 'right';
+        engineSideElement2.textContent = 'right';
+        panelSideElement.textContent = 'R ENG FIRE';
+        document.title = 'R ENG FIRE Warning | King Air B200';
+      }
+    });
+  </script>
+</body>
+</html>

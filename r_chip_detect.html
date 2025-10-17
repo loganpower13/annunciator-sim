@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chip Detection Warning | King Air B200</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* Annunciator Panel Background */
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g><g fill="%23f59e0b" font-family="monospace" font-size="14"><text x="120" y="125">L. DC GEN</text><text x="120" y="175">HYD FLUID LOW</text><text x="120" y="225">RVS NOT READY</text><text x="120" y="275">R. DC GEN</text><text x="120" y="325">L. CHIP DETECT</text><text x="120" y="375">DUCT OVERTEMP</text><text x="120" y="425">R. CHIP DETECT</text><text x="120" y="475">L. ENG ICE FAIL</text><text x="450" y="125">L ENG FIRE</text><text x="450" y="175">DOOR UNLOCKED</text><text x="450" y="225">ALT WARN</text><text x="450" y="275">R ENG FIRE</text><text x="450" y="325">L FUEL PRESS</text><text x="450" y="375">L OIL PRESS</text><text x="450" y="425">R FUEL PRESS</text><text x="450" y="475">R OIL PRESS</text></g><g fill="%23ef4444"><circle cx="90" cy="120" r="6"/><circle cx="90" cy="220" r="6"/><circle cx="90" cy="320" r="6"/><circle cx="90" cy="420" r="6"/><circle cx="420" cy="120" r="6"/><circle cx="420" cy="220" r="6"/><circle cx="420" cy="320" r="6"/><circle cx="420" cy="420" r="6"/></g><g fill="%2310b981"><circle cx="90" cy="170" r="6"/><circle cx="90" cy="270" r="6"/><circle cx="90" cy="370" r="6"/><circle cx="90" cy="470" r="6"/><circle cx="420" cy="170" r="6"/><circle cx="420" cy="270" r="6"/><circle cx="420" cy="370" r="6"/><circle cx="420" cy="470" r="6"/></g></svg>') center/cover no-repeat;
+      opacity: 0.35;
+      filter: blur(12px) brightness(0.8);
+    }
+
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    
+    /* Home button styling */
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Improved message section styling */
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    /* Warning highlight */
+    .warning-highlight {
+      background-color: rgba(220, 38, 38, 0.2);
+      border-left: 4px solid #dc2626;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Caution highlight */
+    .caution-highlight {
+      background-color: rgba(245, 158, 11, 0.2);
+      border-left: 4px solid #f59e0b;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Memory item styling */
+    .memory-item {
+      background-color: rgba(220, 38, 38, 0.3);
+      border: 2px solid #dc2626;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+    
+    /* Checklist formatting */
+    .checklist-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .checklist-action {
+      flex: 1;
+    }
+    
+    .checklist-dots {
+      flex-grow: 1;
+      border-bottom: 1px dotted #94a3b8;
+      margin: 0 0.5rem;
+      position: relative;
+      top: -4px;
+    }
+    
+    .checklist-result {
+      min-width: 150px;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Annunciator Panel Background -->
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar w-64 p-4 bg-gray-100 text-gray-800">
+      <h2 class="text-lg font-bold mb-4">Chip Detection Warning</h2>
+      
+      <!-- Navigation Links -->
+      <div class="space-y-2 mb-6">
+        <a href="kingair_b200_simulator.html" class="home-btn w-full justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          Back to Simulator
+        </a>
+        
+        <div class="bg-amber-100 border border-amber-300 rounded p-3">
+          <div class="font-bold text-amber-700">Warning Pages</div>
+          <div class="mt-2 space-y-1">
+            <a href="chip_detect_left.html" class="block p-2 bg-amber-50 rounded hover:bg-amber-100 text-amber-700">L CHIP DETECT</a>
+            <a href="chip_detect_right.html" class="block p-2 bg-amber-50 rounded hover:bg-amber-100 text-amber-700">R CHIP DETECT</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Reference -->
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <div class="font-bold text-blue-700">Quick Reference</div>
+        <ul class="mt-2 text-sm space-y-1">
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Indicates ferrous metal particles in oil</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Monitor engine parameters for abnormalities</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Shutdown at pilot's discretion if abnormal</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Located at bottom of reduction gearbox</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="main-content flex-1 p-6">
+      <div class="sim-card">
+        <h1 class="text-2xl font-bold mb-2"><span id="warningSide">L CHIP DETECT</span> Warning</h1>
+        <p class="text-center mb-6 text-gray-300">Understanding and responding to <span id="warningSideLower">L CHIP DETECT</span> warnings in the King Air B200</p>
+
+        <div class="message-container">
+          <div class="message-header">Warning Description</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Annunciator</div>
+              <div class="message-value flex items-center">
+                <div class="w-4 h-4 rounded-full bg-amber-500 mr-3"></div>
+                <span id="warningSideText">L CHIP DETECT</span>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Condition</div>
+              <div class="message-value">Ferrous metal particles detected in the <span id="engineSide">left</span> engine oil system</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Trigger Point</div>
+              <div class="message-value">Magnetic chip detector attracts ferrous metal particles in the oil</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Annunciator Color</div>
+              <div class="message-value">
+                <p><strong>BB-1439, 1444 and subsequent:</strong> Amber caution light</p>
+                <p><strong>Prior to BB-1444, except 1439:</strong> Red warning light</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Emergency Checklist</div>
+          <div class="message-content">
+            <div class="memory-item">
+              <div class="checklist-item">
+                <div class="checklist-action">Engine Parameters</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">MONITOR FOR ABNORMAL INDICATIONS</div>
+              </div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">If Abnormal</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">SHUTDOWN ENGINE AT PILOT'S DISCRETION</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Chip Detection System Components</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Magnetic Chip Detector</div>
+              <div class="message-value">
+                <p>Located at the bottom of each reduction gearbox. Contains magnets that attract and capture ferrous (iron-based) metal particles circulating in the engine oil.</p>
+                <p class="mt-2">When sufficient metal accumulates on the detector, it completes an electrical circuit that illuminates the respective CHIP DETECT annunciator.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Reduction Gearbox Location</div>
+              <div class="message-value">
+                <p>The reduction gear section is located at the front of the engine and is a two-stage, planetary type. Its primary function is to reduce the high rpm of the free turbine to the value required for propeller operation.</p>
+                <div class="caution-highlight mt-2">
+                  <strong>NOTE:</strong> The reduction gear section is also used for torquemeter operation and includes drive sections for the propeller governor, propeller overspeed governor, and propeller tachgenerator.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Oil System Flow</div>
+              <div class="message-value">
+                <p>The engine lubrication system is a completely self-contained dry-sump system. Oil is scavenged from the reduction gearcase and returned to the tank through the oil cooler.</p>
+                <p class="mt-2">Any metal particles from gear wear or bearing deterioration will be carried by the oil flow to the chip detector located at the lowest point of the reduction gearbox.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Response Procedures</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Immediate Actions</div>
+              <div class="message-value">
+                <div class="checklist-item">
+                  <div class="checklist-action">Monitor Engine Instruments</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">TORQUE, ITT, OIL PRESS/TEMP, N₁, N₂</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Listen for Abnormal Noises</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">GEAR WHINE, BEARING NOISE</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Check for Vibration</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">UNUSUAL AIRFRAME VIBRATION</div>
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Abnormal Indications Requiring Shutdown</div>
+              <div class="message-value">
+                <div class="warning-highlight">
+                  <strong>SHUTDOWN ENGINE IF ANY OF THE FOLLOWING OCCUR:</strong>
+                  <ul class="mt-2 ml-4 space-y-1">
+                    <li>• Decreasing oil pressure or increasing oil temperature</li>
+                    <li>• Fluctuating or decreasing torque</li>
+                    <li>• Rising ITT at constant power setting</li>
+                    <li>• Unusual mechanical noises or vibration</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">If No Abnormal Indications</div>
+              <div class="message-value">
+                <div class="caution-highlight">
+                  <strong>CONTINUED FLIGHT CONSIDERATIONS:</strong>
+                  <p class="mt-2">If engine parameters remain normal and no abnormal indications are present, continued flight to destination may be considered. However, the presence of metal particles indicates ongoing mechanical wear that could progress rapidly.</p>
+                  <p class="mt-2"><strong>Recommendation:</strong> Land at nearest suitable airport for inspection.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">System Operation Details</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Oil System Operation</div>
+              <div class="message-value">
+                <p>When the engine is running, the oil pressure pump draws oil from the tank and directs pressure oil through various filters to the engine bearings, accessory and reduction drive gears, propeller governor, and engine torquemeter system.</p>
+                <p class="mt-2">All oil is scavenged to the accessory gearcase except the reduction gearcase oil, which goes directly to the oil cooler. A screened scavenge pump returns the gearcase oil to the tank through the oil-fuel heater.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Reduction Gearbox Importance</div>
+              <div class="message-value">
+                <p>The reduction gear section reduces the high rpm of the free turbine (approximately 38,000 rpm) to the value required for propeller operation (1,600-2,000 rpm). This gearbox contains critical components including:</p>
+                <ul class="mt-2 ml-4 space-y-1">
+                  <li>• Planetary reduction gears</li>
+                  <li>• Torquemeter system components</li>
+                  <li>• Propeller governor drive</li>
+                  <li>• Propeller overspeed governor drive</li>
+                  <li>• Propeller tachgenerator drive</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Maintenance Considerations</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Post-Flight Inspection</div>
+              <div class="message-value">
+                <p>After a CHIP DETECT warning, maintenance must:</p>
+                <ul class="mt-2 ml-4 space-y-1">
+                  <li>• Remove and inspect the magnetic chip detector</li>
+                  <li>• Analyze the type and quantity of metal particles</li>
+                  <li>• Perform oil analysis for metal content</li>
+                  <li>• Inspect oil filter for additional contamination</li>
+                  <li>• Conduct borescope inspection of gearbox if indicated</li>
+                </ul>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Common Sources of Metal Particles</div>
+              <div class="message-value">
+                <ul class="space-y-1">
+                  <li>• Normal gear wear (minimal fine particles)</li>
+                  <li>• Bearing deterioration (fine steel particles)</li>
+                  <li>• Gear tooth damage (chunks or slivers)</li>
+                  <li>• Bearing cage failure (brass or bronze particles)</li>
+                  <li>• Foreign object damage</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Set the specific warning side based on which page we're on
+    document.addEventListener('DOMContentLoaded', function() {
+      const path = window.location.pathname;
+      const warningSideElement = document.getElementById('warningSide');
+      const warningSideLowerElement = document.getElementById('warningSideLower');
+      const warningSideTextElement = document.getElementById('warningSideText');
+      const engineSideElement = document.getElementById('engineSide');
+      
+      if (path.includes('chip_detect_left.html') || path === '/chip_detect_left.html' || !path.includes('chip_detect_right')) {
+        // Left chip detect page
+        warningSideElement.textContent = 'L CHIP DETECT';
+        warningSideLowerElement.textContent = 'L CHIP DETECT';
+        warningSideTextElement.textContent = 'L CHIP DETECT';
+        engineSideElement.textContent = 'left';
+        document.title = 'L CHIP DETECT Warning | King Air B200';
+      } else {
+        // Right chip detect page
+        warningSideElement.textContent = 'R CHIP DETECT';
+        warningSideLowerElement.textContent = 'R CHIP DETECT';
+        warningSideTextElement.textContent = 'R CHIP DETECT';
+        engineSideElement.textContent = 'right';
+        document.title = 'R CHIP DETECT Warning | King Air B200';
+      }
+    });
+  </script>
+</body>
+</html>

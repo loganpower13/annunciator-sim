@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oil Pressure Warning | King Air B200</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* Annunciator Panel Background - Fixed Size */
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g><g fill="%23f59e0b" font-family="monospace" font-size="14"><text x="120" y="125">L. DC GEN</text><text x="120" y="175">HYD FLUID LOW</text><text x="120" y="225">RVS NOT READY</text><text x="120" y="275">R. DC GEN</text><text x="120" y="325">L. CHIP DETECT</text><text x="120" y="375">DUCT OVERTEMP</text><text x="120" y="425">R. CHIP DETECT</text><text x="120" y="475">L. ENG ICE FAIL</text><text x="450" y="125">L ENG FIRE</text><text x="450" y="175">DOOR UNLOCKED</text><text x="450" y="225">ALT WARN</text><text x="450" y="275">R ENG FIRE</text><text x="450" y="325">L FUEL PRESS</text><text x="450" y="375">L OIL PRESS</text><text x="450" y="425">R FUEL PRESS</text><text x="450" y="475">R OIL PRESS</text></g><g fill="%23ef4444"><circle cx="90" cy="120" r="6"/><circle cx="90" cy="220" r="6"/><circle cx="90" cy="320" r="6"/><circle cx="90" cy="420" r="6"/><circle cx="420" cy="120" r="6"/><circle cx="420" cy="220" r="6"/><circle cx="420" cy="320" r="6"/><circle cx="420" cy="420" r="6"/></g><g fill="%2310b981"><circle cx="90" cy="170" r="6"/><circle cx="90" cy="270" r="6"/><circle cx="90" cy="370" r="6"/><circle cx="90" cy="470" r="6"/><circle cx="420" cy="170" r="6"/><circle cx="420" cy="270" r="6"/><circle cx="420" cy="370" r="6"/><circle cx="420" cy="470" r="6"/></g></svg>') center/contain no-repeat;
+      opacity: 0.25;
+      filter: blur(8px) brightness(0.8);
+    }
+
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    
+    /* Home button styling */
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Improved message section styling */
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    /* Warning highlight */
+    .warning-highlight {
+      background-color: rgba(220, 38, 38, 0.2);
+      border-left: 4px solid #dc2626;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Caution highlight */
+    .caution-highlight {
+      background-color: rgba(245, 158, 11, 0.2);
+      border-left: 4px solid #f59e0b;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Memory item styling */
+    .memory-item {
+      background-color: rgba(220, 38, 38, 0.3);
+      border: 2px solid #dc2626;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+    
+    /* Checklist formatting */
+    .checklist-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .checklist-action {
+      flex: 1;
+    }
+    
+    .checklist-dots {
+      flex-grow: 1;
+      border-bottom: 1px dotted #94a3b8;
+      margin: 0 0.5rem;
+      position: relative;
+      top: -4px;
+    }
+    
+    .checklist-result {
+      min-width: 150px;
+    }
+    
+    /* Oil Pressure specific styling - UPDATED TO USE RED */
+    .oil-warning {
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(153, 27, 27, 0.3));
+      border: 2px solid #dc2626;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+    }
+    
+    .pressure-indicator {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      margin: 1rem 0;
+    }
+    
+    .pressure-level {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      min-width: 120px;
+    }
+    
+    .level-normal {
+      background: rgba(16, 185, 129, 0.2);
+      border: 2px solid #10b981;
+      color: #10b981;
+    }
+    
+    .level-caution {
+      background: rgba(245, 158, 11, 0.3);
+      border: 2px solid #f59e0b;
+      color: #f59e0b;
+    }
+    
+    .level-warning {
+      background: rgba(239, 68, 68, 0.3);
+      border: 2px solid #ef4444;
+      color: #ef4444;
+    }
+    
+    .pressure-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .pressure-label {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Annunciator Panel Background -->
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar w-64 p-4 bg-gray-100 text-gray-800">
+      <h2 class="text-lg font-bold mb-4">Oil Pressure Warning</h2>
+      
+      <!-- Navigation Links -->
+      <div class="space-y-2 mb-6">
+        <a href="kingair_b200_simulator.html" class="home-btn w-full justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          Back to Simulator
+        </a>
+        
+        <div class="bg-red-100 border border-red-300 rounded p-3">
+          <div class="font-bold text-red-700">Warning Pages</div>
+          <div class="mt-2 space-y-1">
+            <a href="oil_press_left.html" class="block p-2 bg-red-50 rounded hover:bg-red-100 text-red-700">L OIL PRESS</a>
+            <a href="oil_press_right.html" class="block p-2 bg-red-50 rounded hover:bg-red-100 text-red-700">R OIL PRESS</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Reference -->
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <div class="font-bold text-blue-700">Quick Reference</div>
+        <ul class="mt-2 text-sm space-y-1">
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Normal range: 85-120 PSI</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>60-85 PSI: Reduce power, do not exceed 1100 ft-lbs</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Below 60 PSI: Land immediately at nearest airport</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="main-content flex-1 p-6">
+      <div class="sim-card">
+        <h1 class="text-2xl font-bold mb-2"><span id="warningSide">L OIL PRESS</span> Warning</h1>
+        <p class="text-center mb-6 text-gray-300">Understanding and responding to <span id="warningSideLower">L OIL PRESS</span> warnings in the King Air B200</p>
+
+        <div class="oil-warning">
+          <div class="text-center mb-4">
+            <div class="flex items-center justify-center mb-4">
+              <!-- UPDATED: Changed from amber to red circle -->
+              <div class="w-6 h-6 rounded-full bg-red-500 mr-3"></div>
+              <span class="text-xl font-bold text-red-300"><span id="warningSideHeader">L OIL PRESS</span> - LOW OIL PRESSURE</span>
+            </div>
+            <p class="text-red-200">Low oil pressure detected in the <span id="engineSide">left</span> engine. Monitor closely and take appropriate action.</p>
+          </div>
+
+          <!-- Pressure Level Indicators -->
+          <div class="pressure-indicator">
+            <div class="pressure-level level-normal">
+              <div class="pressure-value">85-120</div>
+              <div class="pressure-label">NORMAL</div>
+            </div>
+            <div class="pressure-level level-caution">
+              <div class="pressure-value">60-85</div>
+              <div class="pressure-label">CAUTION</div>
+            </div>
+            <div class="pressure-level level-warning">
+              <div class="pressure-value">&lt;60</div>
+              <div class="pressure-label">WARNING</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Warning Description</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Annunciator</div>
+              <div class="message-value flex items-center">
+                <!-- UPDATED: Changed from amber to red circle -->
+                <div class="w-4 h-4 rounded-full bg-red-500 mr-3"></div>
+                <span id="warningSideText">L OIL PRESS</span>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Condition</div>
+              <div class="message-value">Low oil pressure detected in the <span id="engineSide2">left</span> engine lubrication system</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Normal Operating Range</div>
+              <div class="message-value">85-120 PSI at normal cruise power settings</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Emergency Procedures</div>
+          <div class="message-content">
+            <div class="caution-highlight">
+              <strong>60-85 PSI: UNDESIRABLE OPERATION</strong>
+              <ul class="mt-2 ml-4 list-disc">
+                <li>Complete flight at reduced power</li>
+                <li>Do not exceed 1100 FT-LBS torque</li>
+                <li>Monitor oil temperature and pressure closely</li>
+                <li>Land at nearest suitable airport</li>
+              </ul>
+            </div>
+            
+            <div class="warning-highlight">
+              <strong>BELOW 60 PSI: UNSAFE OPERATION</strong>
+              <ul class="mt-2 ml-4 list-disc">
+                <li>Secure engine or land immediately</li>
+                <li>Use minimum power required for safe landing</li>
+                <li>Land at nearest suitable airport</li>
+                <li>Prepare for possible engine shutdown</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Oil Pressure Checklist</div>
+          <div class="message-content">
+            <div class="checklist-item">
+              <div class="checklist-action">Oil Pressure Indication</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">MONITOR</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Engine Instruments</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">SCAN FREQUENTLY</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Power Setting</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">REDUCE AS REQUIRED</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Torque (if 60-85 PSI)</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">DO NOT EXCEED 1100 FT-LBS</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Landing Planning</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">INITIATE IMMEDIATELY</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Oil System Information</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">System Function</div>
+              <div class="message-value">
+                <p>The engine oil system provides lubrication, cooling, and cleaning for the engine's internal components. Proper oil pressure is critical for engine health and operation.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Pressure Sensing</div>
+              <div class="message-value">
+                <p>Oil pressure is monitored by sensors that trigger warning annunciators when pressure falls below safe operating limits. The system provides continuous monitoring during flight.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Possible Causes</div>
+              <div class="message-value">
+                <ul class="list-disc ml-4">
+                  <li>Low oil quantity</li>
+                  <li>Oil pump failure or wear</li>
+                  <li>Oil filter blockage</li>
+                  <li>Oil leakage</li>
+                  <li>Oil viscosity issues</li>
+                  <li>Sensor malfunction</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Operational Considerations</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Flight Planning</div>
+              <div class="message-value">
+                <p>When low oil pressure is indicated, immediately begin planning for landing at the nearest suitable airport. Consider weather, runway length, and available services.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Power Management</div>
+              <div class="message-value">
+                <p>Reduce power settings to minimize stress on the engine. Maintain altitude with reduced power rather than increasing power to maintain airspeed.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Communication</div>
+              <div class="message-value">
+                <p>Notify ATC of the situation and intentions. Request priority handling if necessary. Consider declaring an emergency if pressure continues to decrease.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Additional Notes</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Safety Priority</div>
+              <div class="message-value">
+                <div class="warning-highlight">
+                  <strong>CRITICAL:</strong> Operation with oil pressure below 60 PSI can lead to catastrophic engine failure. The engine should be secured and the aircraft landed at the nearest suitable airport using minimum power required.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Post-Flight Actions</div>
+              <div class="message-value">
+                <p>After landing with low oil pressure indication, do not operate the engine until inspected by qualified maintenance personnel. Document the event in the aircraft maintenance log.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Set the specific warning side based on which page we're on
+    document.addEventListener('DOMContentLoaded', function() {
+      const path = window.location.pathname;
+      const warningSideElement = document.getElementById('warningSide');
+      const warningSideLowerElement = document.getElementById('warningSideLower');
+      const warningSideTextElement = document.getElementById('warningSideText');
+      const warningSideHeaderElement = document.getElementById('warningSideHeader');
+      const engineSideElement = document.getElementById('engineSide');
+      const engineSideElement2 = document.getElementById('engineSide2');
+      
+      if (path.includes('oil_press_left.html') || path === '/oil_press_left.html' || !path.includes('oil_press_right')) {
+        // Left oil press page
+        warningSideElement.textContent = 'L OIL PRESS';
+        warningSideLowerElement.textContent = 'L OIL PRESS';
+        warningSideTextElement.textContent = 'L OIL PRESS';
+        warningSideHeaderElement.textContent = 'L OIL PRESS';
+        engineSideElement.textContent = 'left';
+        engineSideElement2.textContent = 'left';
+        document.title = 'L OIL PRESS Warning | King Air B200';
+      } else {
+        // Right oil press page
+        warningSideElement.textContent = 'R OIL PRESS';
+        warningSideLowerElement.textContent = 'R OIL PRESS';
+        warningSideTextElement.textContent = 'R OIL PRESS';
+        warningSideHeaderElement.textContent = 'R OIL PRESS';
+        engineSideElement.textContent = 'right';
+        engineSideElement2.textContent = 'right';
+        document.title = 'R OIL PRESS Warning | King Air B200';
+      }
+    });
+  </script>
+</body>
+</html>
