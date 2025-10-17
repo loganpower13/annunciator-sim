@@ -23,6 +23,15 @@
       background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
     }
     
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g><g fill="%23f59e0b" font-family="monospace" font-size="14"><text x="120" y="125">L. DC GEN</text><text x="120" y="175">HYD FLUID LOW</text><text x="120" y="225">RVS NOT READY</text><text x="120" y="275">R. DC GEN</text><text x="120" y="325">L. CHIP DETECT</text><text x="120" y="375">DUCT OVERTEMP</text><text x="120" y="425">R. CHIP DETECT</text><text x="120" y="475">L. ENG ICE FAIL</text><text x="450" y="125">L ENG FIRE</text><text x="450" y="175">DOOR UNLOCKED</text><text x="450" y="225">INVERTER</text><text x="450" y="275">R ENG FIRE</text><text x="450" y="325">L FUEL PRESS</text><text x="450" y="375">L OIL PRESS</text><text x="450" y="425">R FUEL PRESS</text><text x="450" y="475">R OIL PRESS</text></g><g fill="%23ef4444"><circle cx="90" cy="120" r="6"/><circle cx="90" cy="220" r="6"/><circle cx="90" cy="320" r="6"/><circle cx="90" cy="420" r="6"/><circle cx="420" cy="120" r="6"/><circle cx="420" cy="220" r="6"/><circle cx="420" cy="320" r="6"/><circle cx="420" cy="420" r="6"/></g><g fill="%2310b981"><circle cx="90" cy="170" r="6"/><circle cx="90" cy="270" r="6"/><circle cx="90" cy="370" r="6"/><circle cx="90" cy="470" r="6"/><circle cx="420" cy="170" r="6"/><circle cx="420" cy="270" r="6"/><circle cx="420" cy="370" r="6"/><circle cx="420" cy="470" r="6"/></g></svg>') center/cover no-repeat;
+      opacity: 0.35;
+      filter: blur(12px) brightness(0.8);
+    }
+
     .simulator-container {
       position: relative;
       z-index: 1;
@@ -34,8 +43,6 @@
       border-radius: 1rem;
       padding: 2rem;
       box-shadow: 0 0 30px rgba(59,130,246,0.15);
-      max-width: 800px;
-      margin: 0 auto;
     }
     
     /* Home button styling */
@@ -55,6 +62,55 @@
     .home-btn:hover {
       background-color: #2563eb;
       box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Improved message section styling */
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    /* Procedure formatting */
+    .procedure-text {
+      white-space: pre-line;
+      text-align: left;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
     }
     
     /* Warning highlight */
@@ -99,112 +155,230 @@
     .checklist-result {
       min-width: 150px;
     }
-    
-    .content-section {
-      background: rgba(15, 23, 42, 0.8);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      border: 1px solid rgba(255,255,255,0.1);
-      margin-top: 1.5rem;
-    }
-    
-    .section-header {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #60a5fa;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      padding-bottom: 0.5rem;
-    }
   </style>
 </head>
 <body class="min-h-screen">
   <!-- Annunciator Panel Background -->
   <div class="annunciator-bg"></div>
   
-  <div class="simulator-container min-h-screen p-6">
-    <div class="sim-card">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">INVERTER Warning</h1>
-        <a href="kingair_b200_simulator.html" class="home-btn">
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar w-64 p-4 bg-gray-100 text-gray-800">
+      <h2 class="text-lg font-bold mb-4">INVERTER Warning</h2>
+      
+      <!-- Navigation Links -->
+      <div class="space-y-2 mb-6">
+        <a href="kingair_b200_simulator.html" class="home-btn w-full justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
           </svg>
           Back to Simulator
         </a>
-      </div>
-
-      <div class="content-section">
-        <div class="section-header">Emergency Checklist</div>
-        <div class="memory-item">
-          <div class="checklist-item">
-            <div class="checklist-action">Inverter</div>
-            <div class="checklist-dots"></div>
-            <div class="checklist-result">SELECT OTHER</div>
-          </div>
-        </div>
-        <div class="checklist-item">
-          <div class="checklist-action">INVERTER Annunciator</div>
-          <div class="checklist-dots"></div>
-          <div class="checklist-result">EXTINGUISHED</div>
-        </div>
-      </div>
-
-      <div class="content-section">
-        <div class="section-header">System Information</div>
-        <div class="space-y-4">
-          <div>
-            <h3 class="font-semibold text-lg mb-2">System Overview</h3>
-            <p>The King Air B200 has two inverters that provide AC power for avionics equipment and engine instruments. Each inverter supplies both 115-volt and 26-volt, 400-Hertz power.</p>
-          </div>
-          
-          <div>
-            <h3 class="font-semibold text-lg mb-2">Components Involved</h3>
-            <ul class="list-disc list-inside space-y-2">
-              <li><strong>Two Inverters:</strong> Located in wing center section outboard of each nacelle</li>
-              <li><strong>INVERTER Select Switch:</strong> On pilot's left subpanel controls inverter selection</li>
-              <li><strong>Volt-Frequency Meter:</strong> Monitors inverter output (105-120 VAC, 380-420 Hz)</li>
-              <li><strong>Inverter Power Relay:</strong> Activates when inverter is selected</li>
-            </ul>
-          </div>
-          
-          <div class="warning-highlight">
-            <strong>OPERATIONAL REQUIREMENT:</strong> Due to avionics equipment requirements, the 115-volt inverter output must be maintained at 105-120 VAC, 380-420 Hz.
+        
+        <div class="bg-red-100 border border-red-300 rounded p-3">
+          <div class="font-bold text-red-700">Warning Pages</div>
+          <div class="mt-2 space-y-1">
+            <a href="inverter_warning.html" class="block p-2 bg-red-200 rounded hover:bg-red-300 text-red-800 font-bold">INVERTER</a>
           </div>
         </div>
       </div>
-
-      <div class="content-section">
-        <div class="section-header">Normal Operation</div>
-        <div class="space-y-3">
-          <p>• Turn the INVERTER select switch to either inverter position</p>
-          <p>• Verify the INVERTER warning light extinguishes</p>
-          <p>• Monitor the VOLT-FREQ meter for proper output</p>
-          <p>• Only one inverter operates at a time</p>
-          <p>• Inverter operation is controlled by the INVERTER select switch on pilot's left subpanel</p>
-        </div>
+      
+      <!-- Quick Reference -->
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <div class="font-bold text-blue-700">Quick Reference</div>
+        <ul class="mt-2 text-sm space-y-1">
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Illuminates when active inverter fails</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Select alternate inverter immediately</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Monitor VOLT-FREQ meter for proper output</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Both inverters are identical and interchangeable</span>
+          </li>
+        </ul>
       </div>
+    </div>
+    
+    <div class="main-content flex-1 p-6">
+      <div class="sim-card">
+        <h1 class="text-2xl font-bold mb-2">INVERTER Warning</h1>
+        <p class="text-center mb-6 text-gray-300">Inverter Failure - AC Power System Alert</p>
 
-      <div class="content-section">
-        <div class="section-header">Additional Notes</div>
-        <div class="space-y-3">
-          <p>• The red INVERTER warning light illuminates when the active inverter fails</p>
-          <p>• Selection of the alternate inverter should immediately resolve the issue</p>
-          <p>• Both inverters are identical and either can power all AC systems</p>
-          <p>• Inverters are powered from the generator buses through current limiters</p>
-          <p>• Monitor electrical loads when operating on single inverter</p>
+        <div class="message-container">
+          <div class="message-header">Warning Description</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Annunciator</div>
+              <div class="message-value flex items-center">
+                <div class="w-4 h-4 rounded-full bg-red-500 mr-3"></div>
+                INVERTER (INST INV on 200 models)
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Condition</div>
+              <div class="message-value">Active inverter has failed or is not providing proper AC power output</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Trigger Point</div>
+              <div class="message-value">Inverter failure detected by monitoring circuits, causing red INVERTER warning light to illuminate</div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="content-section">
-        <div class="section-header">Circuit Protection</div>
-        <div class="space-y-3">
-          <p><strong>INVERTER CONTROL Circuit Breakers:</strong></p>
-          <ul class="list-disc list-inside ml-4 space-y-1">
-            <li>No. 1 INVERTER CONTROL - 5 AMP (Right Side Panel)</li>
-            <li>No. 2 INVERTER CONTROL - 5 AMP (Right Side Panel)</li>
-          </ul>
-          <p class="mt-2 text-sm text-gray-300">These protect the inverter control switches and control relays.</p>
+        <div class="message-container">
+          <div class="message-header">Emergency Checklist</div>
+          <div class="message-content">
+            <div class="memory-item">
+              <div class="checklist-item">
+                <div class="checklist-action">Inverter</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">SELECT OTHER</div>
+              </div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">INVERTER Annunciator</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">EXTINGUISHED</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">VOLT-FREQ Meter</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">MONITOR (105-120 VAC, 380-420 Hz)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">AC Power System Components</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Inverters</div>
+              <div class="message-value">
+                <p>Two inverters installed in wing center section outboard of each nacelle. Each inverter provides both 115-volt and 26-volt, 400-Hertz power for avionics equipment and engine instruments.</p>
+                <p class="mt-2">Only one inverter operates at a time, selected by the INVERTER select switch on pilot's left subpanel.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">INVERTER Select Switch</div>
+              <div class="message-value">
+                <p>Located on pilot's left subpanel. Controls which inverter is active. Selection of either inverter activates the inverter power relay and supplies inverter input power.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">VOLT-FREQ Meter</div>
+              <div class="message-value">
+                <p>Monitors inverter output. Normally reads frequency but will display volts when the button is depressed.</p>
+                <div class="warning-highlight mt-2">
+                  <strong>OPERATIONAL REQUIREMENT:</strong> Due to avionics equipment requirements, the 115-volt inverter output must be maintained at 105-120 VAC, 380-420 Hz.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Inverter Control Circuit</div>
+              <div class="message-value">
+                <p>Inverter operation is controlled by an INVERTER select switch on the pilot's left subpanel. Selection of either inverter activates the inverter power relay and supplies inverter input power.</p>
+                <p class="mt-2">The inverters are powered from the generator buses through current limiters.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">System Limitations</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Inverter Output Requirements</div>
+              <div class="message-value">
+                <p>Due to avionics equipment requirements, the 115-volt inverter output must be:</p>
+                <ul class="list-disc list-inside mt-2 ml-4">
+                  <li>105-120 VAC</li>
+                  <li>380-420 Hz</li>
+                </ul>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Electrical Load Considerations</div>
+              <div class="message-value">
+                <div class="warning-highlight">
+                  <strong>NOTE:</strong> Monitor electrical loads when operating on single inverter. Both inverters are identical and either can power all AC systems.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Circuit Protection</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">INVERTER CONTROL Circuit Breakers</div>
+              <div class="message-value">
+                <div class="checklist-item">
+                  <div class="checklist-action">No. 1 INVERTER CONTROL</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">5 AMP (Right Side Panel)</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">No. 2 INVERTER CONTROL</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">5 AMP (Right Side Panel)</div>
+                </div>
+                <p class="mt-2 text-sm text-gray-300">These protect the inverter control switches and control relays.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Normal Operation Procedures</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Standard Operation</div>
+              <div class="message-value">
+                <div class="checklist-item">
+                  <div class="checklist-action">Turn INVERTER select switch</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">TO EITHER INVERTER POSITION</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Verify INVERTER warning light</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">EXTINGUISHED</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Monitor VOLT-FREQ meter</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">FOR PROPER OUTPUT</div>
+                </div>
+                <div class="mt-2">
+                  <p>Only one inverter operates at a time. Inverter operation is controlled by the INVERTER select switch on pilot's left subpanel.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Additional Notes</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">System Redundancy</div>
+              <div class="message-value">
+                <p>• The red INVERTER warning light illuminates when the active inverter fails</p>
+                <p>• Selection of the alternate inverter should immediately resolve the issue</p>
+                <p>• Both inverters are identical and either can power all AC systems</p>
+                <p>• Inverters are powered from the generator buses through current limiters</p>
+                <p>• Monitor electrical loads when operating on single inverter</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
