@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HYD FLUID LOW Annunciator | King Air B200</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* Annunciator Panel Background */
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g><g fill="%23f59e0b" font-family="monospace" font-size="14"><text x="120" y="125">L. DC GEN</text><text x="120" y="175">HYD FLUID LOW</text><text x="120" y="225">RVS NOT READY</text><text x="120" y="275">R. DC GEN</text><text x="120" y="325">L. CHIP DETECT</text><text x="120" y="375">DUCT OVERTEMP</text><text x="120" y="425">R. CHIP DETECT</text><text x="120" y="475">L. ENG ICE FAIL</text><text x="450" y="125">L ENG FIRE</text><text x="450" y="175">DOOR UNLOCKED</text><text x="450" y="225">ALT WARN</text><text x="450" y="275">R ENG FIRE</text><text x="450" y="325">L FUEL PRESS</text><text x="450" y="375">L OIL PRESS</text><text x="450" y="425">R FUEL PRESS</text><text x="450" y="475">R OIL PRESS</text></g><g fill="%23ef4444"><circle cx="90" cy="120" r="6"/><circle cx="90" cy="220" r="6"/><circle cx="90" cy="320" r="6"/><circle cx="90" cy="420" r="6"/><circle cx="420" cy="120" r="6"/><circle cx="420" cy="220" r="6"/><circle cx="420" cy="320" r="6"/><circle cx="420" cy="420" r="6"/></g><g fill="%2310b981"><circle cx="90" cy="170" r="6"/><circle cx="90" cy="270" r="6"/><circle cx="90" cy="370" r="6"/><circle cx="90" cy="470" r="6"/><circle cx="420" cy="170" r="6"/><circle cx="420" cy="270" r="6"/><circle cx="420" cy="370" r="6"/><circle cx="420" cy="470" r="6"/></g></svg>') center/cover no-repeat;
+      opacity: 0.35;
+      filter: blur(12px) brightness(0.8);
+    }
+
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    
+    /* Home button styling */
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Improved message section styling */
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    /* Procedure formatting */
+    .procedure-text {
+      white-space: pre-line;
+      text-align: left;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
+    }
+    
+    /* Warning highlight */
+    .warning-highlight {
+      background-color: rgba(220, 38, 38, 0.2);
+      border-left: 4px solid #dc2626;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Caution highlight */
+    .caution-highlight {
+      background-color: rgba(234, 179, 8, 0.2);
+      border-left: 4px solid #eab308;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Memory item styling */
+    .memory-item {
+      background-color: rgba(234, 179, 8, 0.3);
+      border: 2px solid #eab308;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+    
+    /* Checklist formatting */
+    .checklist-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .checklist-action {
+      flex: 1;
+    }
+    
+    .checklist-dots {
+      flex-grow: 1;
+      border-bottom: 1px dotted #94a3b8;
+      margin: 0 0.5rem;
+      position: relative;
+      top: -4px;
+    }
+    
+    .checklist-result {
+      min-width: 150px;
+    }
+    
+    /* System diagram styling */
+    .system-diagram {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    
+    .diagram-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+    }
+    
+    .diagram-placeholder {
+      background: rgba(15, 23, 42, 0.5);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      border: 1px dashed rgba(255,255,255,0.2);
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Annunciator Panel Background -->
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar w-64 p-4 bg-gray-100 text-gray-800">
+      <h2 class="text-lg font-bold mb-4">HYD FLUID LOW Annunciator</h2>
+      
+      <!-- Navigation Links -->
+      <div class="space-y-2 mb-6">
+        <a href="kingair_b200_simulator.html" class="home-btn w-full justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          Back to Simulator
+        </a>
+        
+        <div class="bg-yellow-100 border border-yellow-300 rounded p-3">
+          <div class="font-bold text-yellow-700">Caution Pages</div>
+          <div class="mt-2 space-y-1">
+            <a href="hyd_fluid_low.html" class="block p-2 bg-yellow-50 rounded hover:bg-yellow-100 text-yellow-700">HYD FLUID LOW</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Reference -->
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <div class="font-bold text-blue-700">Quick Reference</div>
+        <ul class="mt-2 text-sm space-y-1">
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Indicates low hydraulic fluid level</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Follow manual extension if gear fails</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Use hand pump for emergency extension</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="main-content flex-1 p-6">
+      <div class="sim-card">
+        <h1 class="text-2xl font-bold mb-2">HYD FLUID LOW Annunciator</h1>
+        <p class="text-center mb-6 text-gray-300">Hydraulic Fluid Level Warning - Landing Gear System Alert</p>
+
+        <div class="message-container">
+          <div class="message-header">Caution Description</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Annunciator</div>
+              <div class="message-value flex items-center">
+                <div class="w-4 h-4 rounded-full bg-yellow-500 mr-3"></div>
+                HYD FLUID LOW
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Condition</div>
+              <div class="message-value">Low hydraulic fluid level detected in the hydraulic power pack reservoir</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Trigger Point</div>
+              <div class="message-value">Fluid level sensor on the reservoir completes a circuit to illuminate the amber HYD FLUID LOW annunciator</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Hydraulic System Overview</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Hydraulic Power Pack</div>
+              <div class="message-value">
+                <p>The hydraulic landing gear system (Serial Nos. BB-1193, BL-73, and subsequent) is actuated by a hydraulic power pack consisting of:</p>
+                <ul class="list-disc list-inside mt-2 ml-4">
+                  <li>28-VDC motor-driven hydraulic pump</li>
+                  <li>Hydraulic reservoir pressurized by engine bleed air</li>
+                  <li>Filters</li>
+                  <li>Solenoid-operated selector valve</li>
+                  <li>Uplock pressure switch</li>
+                </ul>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Reservoir System</div>
+              <div class="message-value">
+                <p>The power pack reservoir is divided into two sections:</p>
+                <ul class="list-disc list-inside mt-2 ml-4">
+                  <li>One section supplies the electrically-driven hydraulic pump</li>
+                  <li>The other section supplies the hand pump</li>
+                </ul>
+                <p class="mt-2">A fill reservoir just inboard of the left nacelle and forward of the main spar features a cap and dipstick assembly for maintaining system fluid level.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Fluid Type</div>
+              <div class="message-value">
+                <p>The system is serviced with MIL-H-5606 hydraulic fluid.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Emergency Checklist</div>
+          <div class="message-content">
+            <div class="memory-item">
+              <div class="checklist-item">
+                <div class="checklist-action">HYD FLUID LOW Annunciator</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">ON</div>
+              </div>
+            </div>
+            <div class="warning-highlight">
+              <strong>LANDING GEAR MANUAL EXTENSION PROCEDURE (If gear fails to extend):</strong>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Pull LANDING GEAR RELAY circuit breaker</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">PULL</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Position LDG GEAR CONT switch handle</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">DN</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Remove hand pump handle from securing clip</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">REMOVE</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Actuate hand pump</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">PUMP UNTIL 3 GREEN LIGHTS</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">If green lights don't illuminate</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">CONTINUE PUMPING UNTIL RESISTANCE</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Place pump handle in down position</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">SECURE IN RETAINING CLIP</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">System Testing</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Annunciator Test</div>
+              <div class="message-value">
+                <p>The HYD FLUID LOW annunciator can be tested by pressing the HYD FLUID SENSOR TEST button on the pilot's subpanel.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Warnings and Notes</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Important Warnings</div>
+              <div class="message-value">
+                <div class="warning-highlight">
+                  <strong>WARNING:</strong> After an emergency landing gear extension has been made, do not stow the extension handle or move any landing gear controls or reset any switches or circuit breakers until the airplane is on jacks. These precautions are necessary because the failure may have been in the gear-up circuit, in which case, the gear might retract on the ground. The gear cannot be retracted manually.
+                </div>
+                <div class="caution-highlight mt-4">
+                  <strong>NOTE:</strong> The landing gear cannot be damaged by continued operation of the hand pump.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Related Systems</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Landing Gear Operation</div>
+              <div class="message-value">
+                <p>The landing gear is extended and retracted by the power pack in conjunction with three hydraulic actuators, one for each gear.</p>
+                <p class="mt-2">Normal extension time: Approximately 6 seconds</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Pressure Cycling</div>
+              <div class="message-value">
+                <p>When the gear is fully retracted:</p>
+                <ul class="list-disc list-inside mt-2 ml-4">
+                  <li>Pressure increases to 2,775 psi, opening the uplock pressure switch</li>
+                  <li>This breaks the circuit to the pump motor relay</li>
+                  <li>When system leakage drops pressure to 2,475 psi, the switch closes to reestablish power</li>
+                  <li>Automatic cycling maintains pressure to keep the gear up and locked</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
