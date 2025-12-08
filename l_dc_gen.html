@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L/R DC GEN Annunciator | King Air B200</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* Annunciator Panel Background */
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g><g fill="%23f59e0b" font-family="monospace" font-size="14"><text x="120" y="125">L. DC GEN</text><text x="120" y="175">HYD FLUID LOW</text><text x="120" y="225">RVS NOT READY</text><text x="120" y="275">R. DC GEN</text><text x="120" y="325">L. CHIP DETECT</text><text x="120" y="375">DUCT OVERTEMP</text><text x="120" y="425">R. CHIP DETECT</text><text x="120" y="475">L. ENG ICE FAIL</text><text x="450" y="125">L ENG FIRE</text><text x="450" y="175">DOOR UNLOCKED</text><text x="450" y="225">ALT WARN</text><text x="450" y="275">R ENG FIRE</text><text x="450" y="325">L FUEL PRESS</text><text x="450" y="375">L OIL PRESS</text><text x="450" y="425">R FUEL PRESS</text><text x="450" y="475">R OIL PRESS</text></g><g fill="%23ef4444"><circle cx="90" cy="120" r="6"/><circle cx="90" cy="220" r="6"/><circle cx="90" cy="320" r="6"/><circle cx="90" cy="420" r="6"/><circle cx="420" cy="120" r="6"/><circle cx="420" cy="220" r="6"/><circle cx="420" cy="320" r="6"/><circle cx="420" cy="420" r="6"/></g><g fill="%2310b981"><circle cx="90" cy="170" r="6"/><circle cx="90" cy="270" r="6"/><circle cx="90" cy="370" r="6"/><circle cx="90" cy="470" r="6"/><circle cx="420" cy="170" r="6"/><circle cx="420" cy="270" r="6"/><circle cx="420" cy="370" r="6"/><circle cx="420" cy="470" r="6"/></g></svg>') center/cover no-repeat;
+      opacity: 0.35;
+      filter: blur(12px) brightness(0.8);
+    }
+
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    
+    /* Home button styling */
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Improved message section styling */
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    /* Procedure formatting */
+    .procedure-text {
+      white-space: pre-line;
+      text-align: left;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
+    }
+    
+    /* Caution highlight */
+    .caution-highlight {
+      background-color: rgba(234, 179, 8, 0.2);
+      border-left: 4px solid #eab308;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Memory item styling */
+    .memory-item {
+      background-color: rgba(234, 179, 8, 0.3);
+      border: 2px solid #eab308;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+    
+    /* Checklist formatting */
+    .checklist-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .checklist-action {
+      flex: 1;
+    }
+    
+    .checklist-dots {
+      flex-grow: 1;
+      border-bottom: 1px dotted #94a3b8;
+      margin: 0 0.5rem;
+      position: relative;
+      top: -4px;
+    }
+    
+    .checklist-result {
+      min-width: 150px;
+    }
+    
+    /* System diagram styling */
+    .system-diagram {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    
+    .diagram-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+    }
+    
+    .diagram-placeholder {
+      background: rgba(15, 23, 42, 0.5);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      border: 1px dashed rgba(255,255,255,0.2);
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Annunciator Panel Background -->
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar w-64 p-4 bg-gray-100 text-gray-800">
+      <h2 class="text-lg font-bold mb-4">L/R DC GEN Annunciator</h2>
+      
+      <!-- Navigation Links -->
+      <div class="space-y-2 mb-6">
+        <a href="kingair_b200_simulator.html" class="home-btn w-full justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          Back to Simulator
+        </a>
+        
+        <div class="bg-yellow-100 border border-yellow-300 rounded p-3">
+          <div class="font-bold text-yellow-700">Caution Pages</div>
+          <div class="mt-2 space-y-1">
+            <a href="l_dc_gen.html" class="block p-2 bg-yellow-50 rounded hover:bg-yellow-100 text-yellow-700">L DC GEN</a>
+            <a href="r_dc_gen.html" class="block p-2 bg-yellow-50 rounded hover:bg-yellow-100 text-yellow-700">R DC GEN</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Reference -->
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <div class="font-bold text-blue-700">Quick Reference</div>
+        <ul class="mt-2 text-sm space-y-1">
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Illuminates when generator is off line</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>First action: Attempt generator reset</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Monitor remaining generator load</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Reduce electrical load if needed</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="main-content flex-1 p-6">
+      <div class="sim-card">
+        <h1 class="text-2xl font-bold mb-2">L/R DC GEN Annunciator</h1>
+        <p class="text-center mb-6 text-gray-300">DC Generator Failure - Electrical System Alert</p>
+
+        <div class="message-container">
+          <div class="message-header">Caution Description</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Annunciator</div>
+              <div class="message-value flex items-center">
+                <div class="w-4 h-4 rounded-full bg-yellow-500 mr-3"></div>
+                L DC GEN / R DC GEN
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Condition</div>
+              <div class="message-value">Left or right DC generator has dropped off line or is not supplying power to the electrical system</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Trigger Point</div>
+              <div class="message-value">Generator Control Unit (GCU) detects generator is not supplying power to the bus system</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Emergency Checklist</div>
+          <div class="message-content">
+            <div class="memory-item">
+              <div class="checklist-item">
+                <div class="checklist-action">Loadmeter</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">VERIFY GENERATOR IS OFF (0% LOAD)</div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-action">Generator</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">RESET, THEN ON</div>
+              </div>
+            </div>
+            <div class="caution-highlight">
+              <strong>If Generator Will Not Reset:</strong>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Generator</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">OFF</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Loadmeter</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">DO NOT EXCEED 100% (88% ABOVE 31,000FT)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Electrical System Components</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">DC Generators</div>
+              <div class="message-value">
+                <p>Two 30-volt, regulated to 28.25 ± .25 volts, 250-ampere starter-generators connected in parallel provide normal DC power. Either generator can supply the entire electrical load.</p>
+                <p class="mt-2">Optional 300-ampere starter-generators are available and installed on some airplanes.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Generator Control Units (GCU)</div>
+              <div class="message-value">
+                <p>Maintain constant voltage during variations in engine speed and electrical load requirements. The voltage regulating circuit will automatically connect or disconnect a generator's output to the bus.</p>
+                <div class="caution-highlight mt-2">
+                  <strong>NOTE:</strong> Generators will drop off the line if underexcitation, overexcitation, overvoltage, or undervoltage conditions exist.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Volt-Loadmeters</div>
+              <div class="message-value">
+                <p>Located on the overhead panel, these indicate generator amperage in percent of 250 amps per generator. The associated meter button must be pressed to indicate bus voltage.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Generator Switches</div>
+              <div class="message-value">
+                <p>Located on the pilot's left subpanel under the MASTER SWITCH gang bar with the BAT switch. To turn the generator on, the control switch must be held upward in the GEN RESET position for a minimum of one second, then released to the ON position.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">System Limitations</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Generator Load Limits</div>
+              <div class="message-value">
+                <p>Maximum sustained generator load is limited as follows:</p>
+                <ul class="list-disc list-inside mt-2 ml-4">
+                  <li>Sea Level to 31,000 feet altitude: 100% (250 amps)</li>
+                  <li>Above 31,000 feet altitude: 88% (220 amps)</li>
+                  <li>Ground Operation: 85% (212.5 amps)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Single Generator Operation</div>
+              <div class="message-value">
+                <div class="caution-highlight">
+                  <strong>IMPORTANT:</strong> When operating with only one generator, monitor the loadmeter of the operating generator and do not exceed 100% load (88% above 31,000 feet). Reduce electrical load if necessary by turning off non-essential equipment.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Electrical Distribution System</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Bus Architecture</div>
+              <div class="message-value">
+                <p>The electrical system uses a dual bus architecture with four sub-buses fed by both the left and right generator buses:</p>
+                <ul class="list-disc list-inside mt-2 ml-4">
+                  <li>No. 1 and No. 2 Dual Fed Bus - Copilot's side panel</li>
+                  <li>No. 3 and No. 4 Dual Fed Bus - Fuel panel circuit breaker bus</li>
+                </ul>
+                <p class="mt-2">Each subbus is fed from either side through a 60-ampere current limiter, a 70-ampere reverse current diode, and a 50-ampere circuit breaker.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Isolation Bus</div>
+              <div class="message-value">
+                <p>When the battery, generators, or GPU are providing power, the isolation bus, L generator bus, and R generator bus function as one unit, as long as both current limiters are not open.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Troubleshooting Tips</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Generator Reset Procedure</div>
+              <div class="message-value">
+                <div class="checklist-item">
+                  <div class="checklist-action">Verify affected generator loadmeter</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">0% LOAD</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Hold generator switch</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">UP TO RESET (1 SECOND MINIMUM)</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Release switch</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">TO ON POSITION</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Monitor loadmeter</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">SHOULD SHOW LOAD</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Check annunciator</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">SHOULD EXTINGUISH</div>
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">If Reset Fails</div>
+              <div class="message-value">
+                <div class="checklist-item">
+                  <div class="checklist-action">Affected generator switch</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">OFF</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Monitor operating generator load</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">DO NOT EXCEED LIMITS</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Reduce electrical load if necessary</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">TURN OFF NON-ESSENTIAL EQUIPMENT</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Plan for maintenance</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">AT NEXT SUITABLE AIRPORT</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

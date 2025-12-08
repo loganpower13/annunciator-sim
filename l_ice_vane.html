@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L/R ICE VANE Annunciator | King Air B200</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background-color: #0b0e16;
+      color: #f3f4f6;
+    }
+
+    /* Annunciator Panel Background */
+    .annunciator-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(30,58,138,0.5), rgba(15,23,42,0.95));
+    }
+    
+    .annunciator-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="%230d1424"/><g fill="%231a2337" stroke="%23212b41" stroke-width="1"><rect x="50" y="50" width="700" height="500" rx="10"/></g><g fill="none" stroke="%2329395c" stroke-width="1"><path d="M100 100h600M100 150h600M100 200h600M100 250h600M100 300h600M100 350h600M100 400h600M100 450h600M100 500h600"/><path d="M250 100v400M400 100v400M550 100v400"/></g><g fill="%23f59e0b" font-family="monospace" font-size="14"><text x="120" y="125">L. DC GEN</text><text x="120" y="175">HYD FLUID LOW</text><text x="120" y="225">RVS NOT READY</text><text x="120" y="275">R. DC GEN</text><text x="120" y="325">L. CHIP DETECT</text><text x="120" y="375">DUCT OVERTEMP</text><text x="120" y="425">R. CHIP DETECT</text><text x="120" y="475">L. ENG ICE FAIL</text><text x="450" y="125">L ENG FIRE</text><text x="450" y="175">DOOR UNLOCKED</text><text x="450" y="225">ALT WARN</text><text x="450" y="275">R ENG FIRE</text><text x="450" y="325">L FUEL PRESS</text><text x="450" y="375">L OIL PRESS</text><text x="450" y="425">R FUEL PRESS</text><text x="450" y="475">R OIL PRESS</text></g><g fill="%23ef4444"><circle cx="90" cy="120" r="6"/><circle cx="90" cy="220" r="6"/><circle cx="90" cy="320" r="6"/><circle cx="90" cy="420" r="6"/><circle cx="420" cy="120" r="6"/><circle cx="420" cy="220" r="6"/><circle cx="420" cy="320" r="6"/><circle cx="420" cy="420" r="6"/></g><g fill="%2310b981"><circle cx="90" cy="170" r="6"/><circle cx="90" cy="270" r="6"/><circle cx="90" cy="370" r="6"/><circle cx="90" cy="470" r="6"/><circle cx="420" cy="170" r="6"/><circle cx="420" cy="270" r="6"/><circle cx="420" cy="370" r="6"/><circle cx="420" cy="470" r="6"/></g></svg>') center/cover no-repeat;
+      opacity: 0.35;
+      filter: blur(12px) brightness(0.8);
+    }
+
+    .simulator-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sim-card {
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+    
+    /* Home button styling */
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+      box-shadow: 0 0 15px rgba(59,130,246,0.9);
+    }
+    
+    /* Improved message section styling */
+    .message-container {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .message-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.5rem;
+    }
+    
+    .message-content {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .message-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .message-value {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    /* Procedure formatting */
+    .procedure-text {
+      white-space: pre-line;
+      text-align: left;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
+    }
+    
+    /* Caution highlight */
+    .caution-highlight {
+      background-color: rgba(234, 179, 8, 0.2);
+      border-left: 4px solid #eab308;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Warning highlight */
+    .warning-highlight {
+      background-color: rgba(220, 38, 38, 0.2);
+      border-left: 4px solid #dc2626;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    
+    /* Memory item styling */
+    .memory-item {
+      background-color: rgba(234, 179, 8, 0.3);
+      border: 2px solid #eab308;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+    
+    /* Checklist formatting */
+    .checklist-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .checklist-action {
+      flex: 1;
+    }
+    
+    .checklist-dots {
+      flex-grow: 1;
+      border-bottom: 1px dotted #94a3b8;
+      margin: 0 0.5rem;
+      position: relative;
+      top: -4px;
+    }
+    
+    .checklist-result {
+      min-width: 150px;
+    }
+    
+    /* System diagram styling */
+    .system-diagram {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    
+    .diagram-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+    }
+    
+    .diagram-placeholder {
+      background: rgba(15, 23, 42, 0.5);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      border: 1px dashed rgba(255,255,255,0.2);
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Annunciator Panel Background -->
+  <div class="annunciator-bg"></div>
+  
+  <div class="simulator-container flex min-h-screen">
+    <div class="sidebar w-64 p-4 bg-gray-100 text-gray-800">
+      <h2 class="text-lg font-bold mb-4">L/R ICE VANE Annunciator</h2>
+      
+      <!-- Navigation Links -->
+      <div class="space-y-2 mb-6">
+        <a href="kingair_b200_simulator.html" class="home-btn w-full justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+          Back to Simulator
+        </a>
+        
+        <div class="bg-yellow-100 border border-yellow-300 rounded p-3">
+          <div class="font-bold text-yellow-700">Caution Pages</div>
+          <div class="mt-2 space-y-1">
+            <a href="l_ice_vane.html" class="block p-2 bg-yellow-50 rounded hover:bg-yellow-100 text-yellow-700">L ICE VANE</a>
+            <a href="r_ice_vane.html" class="block p-2 bg-yellow-50 rounded hover:bg-yellow-100 text-yellow-700">R ICE VANE</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Reference -->
+      <div class="bg-blue-50 border border-blue-200 rounded p-3">
+        <div class="font-bold text-blue-700">Quick Reference</div>
+        <ul class="mt-2 text-sm space-y-1">
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Illuminates when ice vane system fails</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>First action: Pull circuit breaker</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Reduce airspeed to 140-160 KIAS</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-1">•</span>
+            <span>Use manual T-handle extension</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="main-content flex-1 p-6">
+      <div class="sim-card">
+        <h1 class="text-2xl font-bold mb-2">L/R ICE VANE Annunciator</h1>
+        <p class="text-center mb-6 text-gray-300">Engine Ice Vane System Failure - Ice Protection Alert</p>
+
+        <div class="message-container">
+          <div class="message-header">Caution Description</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Annunciator</div>
+              <div class="message-value flex items-center">
+                <div class="w-4 h-4 rounded-full bg-yellow-500 mr-3"></div>
+                L ICE VANE / R ICE VANE (Prior to BB-1444, except 1439)<br>
+                L ENG ANTI-ICE / R ENG ANTI-ICE (BB-1439, 1444 and subsequent)
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Condition</div>
+              <div class="message-value">Engine inertial vane and bypass door have not attained the selected position (either open or closed) within 15 seconds of selection</div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Trigger Point</div>
+              <div class="message-value">15-second timer expires without vane reaching commanded position, indicating potential system failure</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Emergency Checklist</div>
+          <div class="message-content">
+            <div class="memory-item">
+              <div class="checklist-item">
+                <div class="checklist-action">Ice Vane Control Circuit Breaker</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">PULL</div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-action">Airspeed</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">140-160 KIAS</div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-action">Manual Extension Handle</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">PULL OUT<br>(ICE VANE EXT annunciator – ILLUMINATED)</div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-action">Airspeed</div>
+                <div class="checklist-dots"></div>
+                <div class="checklist-result">RESUME</div>
+              </div>
+            </div>
+            <div class="warning-highlight">
+              <strong>If ICE VANE EXT Annunciator Does Not Illuminate:</strong>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Exit icing conditions</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">IMMEDIATELY</div>
+            </div>
+            <div class="checklist-item">
+              <div class="checklist-action">Manual Extension Handle</div>
+              <div class="checklist-dots"></div>
+              <div class="checklist-result">PUSH IN (To retract vanes when required)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Engine Ice Protection System Components</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Inertial Vane System</div>
+              <div class="message-value">
+                <p>Prevents engine compressor inlet screen from accumulating ice. When ice vanes are lowered, they deflect the airstream slightly downward, creating a venturi effect. At the same time, an inertial vane bypass door under the cowling is also opened, allowing an exit for ice particles.</p>
+                <p class="mt-2">Ice particles, due to greater mass and momentum, accelerate past the screen area and vent overboard through the bypass door.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Engine Air Inlet Lips</div>
+              <div class="message-value">
+                <p>Heated by engine exhaust gases to prevent ice formation. On airplanes BB-1266, BL-129 and subsequent, hot engine exhaust flows from the left stack, through the lip, and exits out the right stack.</p>
+                <div class="caution-highlight mt-2">
+                  <strong>NOTE:</strong> The engine air inlet lip heating system is automatic and does not require pilot action.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Control Systems</div>
+              <div class="message-value">
+                <p><strong>Prior to BB-1444, except 1439:</strong> ICE VANE toggle switches with mechanical backup T-handles</p>
+                <p><strong>BB-1439, 1444 and subsequent:</strong> ENG ANTI-ICE toggle switches with dual actuators and standby system</p>
+                <p>Circuit breakers located on copilot's right side panel in engine group.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Annunciator Lights</div>
+              <div class="message-value">
+                <p><strong>Green:</strong> L/R ENG ANTI-ICE or L/R ICE VANE EXT - indicates vane and bypass door in extended position</p>
+                <p><strong>Amber/Yellow:</strong> L/R ENG ANTI-ICE or L/R ICE VANE - indicates system did not operate to desired position within 15 seconds</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">System Limitations</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Operating Temperatures</div>
+              <div class="message-value">
+                <p><strong>Extension:</strong> When operating in visible moisture at +5°C or colder</p>
+                <p><strong>Retraction:</strong> At +15°C and above to ensure adequate engine oil cooling</p>
+                <div class="warning-highlight mt-2">
+                  <strong>CAUTION:</strong> If in doubt, extend the vanes. Engine icing can occur even though no surface icing is present. If freedom from visible moisture cannot be assured, engine ice protection should be activated.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Performance Impact</div>
+              <div class="message-value">
+                <div class="caution-highlight">
+                  <strong>IMPORTANT:</strong> Lowering the ice vanes will result in a slight ITT rise and a significant loss of torque at normal cruise power settings. Normal torque may be regained with the power levers, observing the ITT limits.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Manual System Operation (Prior to BB-1444, except 1439)</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Mechanical Backup</div>
+              <div class="message-value">
+                <p>Actuated by pulling T-handles just below the pilot's subpanel. Airspeed should be decreased to 160 knots or less to reduce forces opposing manual operation.</p>
+                <div class="warning-highlight mt-2">
+                  <strong>CRITICAL WARNING:</strong> Once the manual override system has been engaged (i.e., any time the manual ice vane T-handle has been pulled out), do not attempt to retract or extend the ice vanes electrically, even if the T-handle has been pushed back in, until the override linkage in the engine compartment has been properly reset on the ground.
+                </div>
+                <p class="mt-2">However, the pilot can raise or lower the vanes repeatedly, any time, with the manual system engaged.</p>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Electrical System Coordination</div>
+              <div class="message-value">
+                <p>During manual system use, the electric switch position should match the manual handle position for correct annunciator indication, provided the appropriate circuit breaker has been pulled via the checklist.</p>
+                <p>When the vane is successfully positioned with the manual system, the amber annunciator light(s) will extinguish.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Standby System Operation (BB-1439, 1444 and subsequent)</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Dual Actuator System</div>
+              <div class="message-value">
+                <p>Backup system consists of dual actuators and controls. Illumination of the L and R ENG ANTI-ICE (amber) annunciators indicates that the system did not operate to the desired position.</p>
+                <div class="checklist-item mt-2">
+                  <div class="checklist-action">Immediate illumination</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">Indicates loss of electrical power</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">Delayed illumination</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">Indicates inoperative actuator</div>
+                </div>
+                <div class="checklist-item">
+                  <div class="checklist-action">In either event</div>
+                  <div class="checklist-dots"></div>
+                  <div class="checklist-result">STANDBY actuator should be selected</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message-container">
+          <div class="message-header">Operational Considerations</div>
+          <div class="message-content">
+            <div class="message-item">
+              <div class="message-label">Icing Conditions Protocol</div>
+              <div class="message-value">
+                <p>During flight in icing conditions, the following systems should be activated:</p>
+                <ul class="list-disc list-inside mt-2 ml-4">
+                  <li>Engine ice vanes extended</li>
+                  <li>Fuel vent heat ON</li>
+                  <li>Pitot heat ON</li>
+                  <li>Prop deice ON</li>
+                  <li>Windshield heat ON</li>
+                  <li>Stall warning heat ON</li>
+                </ul>
+                <div class="caution-highlight mt-2">
+                  <strong>NOTE:</strong> Operation of strobe lights will sometimes show ice crystals not normally visible.
+                </div>
+              </div>
+            </div>
+            <div class="message-item">
+              <div class="message-label">Vane Position Verification</div>
+              <div class="message-value">
+                <p>The vanes must be either retracted or extended. There are no intermediate positions.</p>
+                <p>A reliable backup check on the position is to closely monitor engine torque. Normal torque may be regained with the power levers, observing the ITT limits.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
