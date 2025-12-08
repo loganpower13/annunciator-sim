@@ -585,3 +585,122 @@
         div.id = `light-${light.replace(/\s+/g, '-')}`;
         div.textContent = light || '———';
         
+        // Add click handler for interactive lights
+        if (light && light !== '———') {
+          div.addEventListener('click', () => {
+            const scenario = scenarios.find(s => s.name === light);
+            if (scenario && scenario.page) {
+              window.location.href = scenario.page;
+            }
+          });
+        }
+        
+        warningPanel.appendChild(div);
+      });
+
+      annunciatorLayout.cautionAdvisory.forEach(light => {
+        const div = document.createElement('div');
+        div.className = 'annunciator-light';
+        div.id = `light-${light.replace(/\s+/g, '-')}`;
+        div.textContent = light || '———';
+        
+        // Add click handler for interactive lights
+        if (light && light !== '———') {
+          div.addEventListener('click', () => {
+            const scenario = scenarios.find(s => s.name === light);
+            if (scenario && scenario.page) {
+              window.location.href = scenario.page;
+            }
+          });
+        }
+        
+        cautionAdvisoryPanel.appendChild(div);
+      });
+    }
+
+    function updateMode() {
+      currentMode = document.getElementById('modeSelect').value;
+      generateScenario();
+    }
+
+    function generateScenario() {
+      let filteredScenarios = scenarios;
+      if (currentMode === 'warnings') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Warning');
+      } else if (currentMode === 'cautions') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Caution');
+      } else if (currentMode === 'advisories') {
+        filteredScenarios = scenarios.filter(s => s.type === 'Advisory');
+      }
+      if (filteredScenarios.length === 0) {
+        document.getElementById('description').textContent = 'No scenarios available in this mode.';
+        document.getElementById('procedure').textContent = '';
+        return;
+      }
+      
+      // Store current scenario in history before generating new one
+      if (currentScenarioIndex !== -1) {
+        scenarioHistory.push(currentScenarioIndex);
+      }
+      
+      const scenarioIndex = Math.floor(Math.random() * filteredScenarios.length);
+      const scenario = filteredScenarios[scenarioIndex];
+      currentScenarioIndex = scenarios.indexOf(scenario);
+      
+      displayScenario(scenario);
+    }
+
+    function previousScenario() {
+      if (scenarioHistory.length > 0) {
+        const previousIndex = scenarioHistory.pop();
+        const scenario = scenarios[previousIndex];
+        currentScenarioIndex = previousIndex;
+        displayScenario(scenario);
+      } else {
+        alert("No previous scenario available.");
+      }
+    }
+
+    function displayScenario(scenario) {
+      // Reset all lights
+      document.querySelectorAll('.annunciator-light').forEach(light => {
+        light.classList.remove('active-warning', 'active-caution', 'active-advisory');
+      });
+      
+      // Activate the appropriate master light
+      document.getElementById('masterWarning').style.display = scenario.type === 'Warning' ? 'block' : 'none';
+      document.getElementById('masterCaution').style.display = scenario.type === 'Caution' ? 'block' : 'none';
+      document.getElementById('masterAdvisory').style.display = scenario.type === 'Advisory' ? 'block' : 'none';
+      
+      // Activate the specific annunciator light
+      const lightId = `light-${scenario.name.replace(/\s+/g, '-')}`;
+      const lightElement = document.getElementById(lightId);
+      if (lightElement) {
+        if (scenario.type === 'Warning') {
+          lightElement.classList.add('active-warning');
+        } else if (scenario.type === 'Caution') {
+          lightElement.classList.add('active-caution');
+        } else if (scenario.type === 'Advisory') {
+          lightElement.classList.add('active-advisory');
+        }
+      }
+      
+      // Update the message section
+      document.getElementById('description').textContent = scenario.description;
+      document.getElementById('procedure').textContent = scenario.procedure;
+    }
+
+    function acknowledgeAlert(type) {
+      // Hide the master light
+      document.getElementById(`master${type}`).style.display = 'none';
+      
+      // Keep the specific annunciator light active for reference
+    }
+
+    // Initialize the simulator
+    window.onload = function() {
+      initializeAnnunciatorPanel();
+    };
+  </script>
+</body>
+</html>
